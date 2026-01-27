@@ -28,1740 +28,1481 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕵️‍♂️</text></svg>">
 
     <style>
-        /* --- Variables --- */
+        /* --- CSS Variables & Themes --- */
         :root {
             --bg-body: #0f172a; --bg-panel: #1e293b; --bg-header: #020617;
             --text-main: #f1f5f9; --text-muted: #94a3b8; --text-light: #ecf0f1;
             --accent: #3b82f6; --accent-hover: #60a5fa; 
-            --border: #334155; --shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+            --border: #334155; 
             --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
             --radius: 6px;
-            --hl-dim: rgba(255, 255, 255, 0.08); 
             --hl-active: rgba(59, 130, 246, 0.5); 
+            --bg-hover: rgba(255,255,255,0.1);
             --toast-y: 85px; 
+            --focus-ring: 0 0 0 2px var(--bg-body), 0 0 0 4px var(--accent);
         }
 
         body.theme-light {
             --bg-body: #f4f6f8; --bg-panel: #ffffff; --bg-header: #202b36;
             --text-main: #2c3e50; --text-muted: #64748b;
             --accent: #2563eb; --accent-hover: #1d4ed8; 
-            --border: #dce1e6; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            --hl-dim: rgba(0, 0, 0, 0.05); 
-            --hl-active: rgba(255, 235, 59, 0.5);
+            --border: #dce1e6; 
+            --hl-active: rgba(37, 99, 235, 0.25);
+            --bg-hover: rgba(0,0,0,0.05);
         }
 
-        /* --- Layout --- */
+        /* --- Global Reset & Scrollbars --- */
         * { box-sizing: border-box; }
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; 
             background: var(--bg-body); color: var(--text-main); margin: 0; 
-            display: flex; flex-direction: column; 
-            height: 100vh; height: 100dvh; 
-            overflow: hidden; 
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden; 
         }
-
-        /* --- 1. MODERN SCROLLBARS --- */
-        /* Standard/Firefox */
+        
         * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: 5px; border: 2px solid transparent; background-clip: content-box; }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--text-muted); }
+        ::-webkit-scrollbar-corner { background: transparent; }
 
-        /* Webkit (Wrapped to prevent Firefox warnings) */
-        @media screen and (-webkit-min-device-pixel-ratio:0) {
-            ::-webkit-scrollbar { width: 10px; height: 10px; }
-            ::-webkit-scrollbar-track { background: transparent; }
-            ::-webkit-scrollbar-thumb { background-color: var(--border); border-radius: 5px; border: 2px solid transparent; background-clip: content-box; }
-            ::-webkit-scrollbar-thumb:hover { background-color: var(--text-muted); }
-            ::-webkit-scrollbar-corner { background: transparent; }
-        }
+        /* --- Accessibility Focus Styles --- */
+        :focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 2px; }
+        .input-textarea:focus-visible { box-shadow: none; border-color: var(--accent); }
 
-        /* --- Components --- */
-        header { background: var(--bg-header); color: var(--text-light); padding: 0 15px; height: 50px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; border-bottom: 1px solid #1e293b; z-index: 10; }
-        .branding { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
-        .branding:hover { opacity: 0.9; }
-        .logo-text { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
-        .nav-links { display: flex; gap: 10px; align-items: center; }
-        .nav-link { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; display: flex; align-items: center; gap: 5px; }
-        .nav-link:hover { color: var(--text-light); }
-        .icon-btn { background: none; border: 1px solid transparent; color: inherit; font-size: 1.2rem; cursor: pointer; padding: 6px; border-radius: 4px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
-        .icon-btn:hover { background: rgba(255,255,255,0.1); }
+        /* --- Buttons & Inputs --- */
+        .icon-btn { background: none; border: 1px solid transparent; color: inherit; font-size: 1.1rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; }
+        .icon-btn:hover { background: var(--bg-hover); }
+        .icon-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
         .btn-fancy {
             display: flex; align-items: stretch; padding: 0; border: 1px solid var(--border); border-radius: var(--radius);
-            background: var(--bg-panel); color: var(--text-main); cursor: pointer; transition: all 0.1s; overflow: hidden; height: 36px;
+            background: var(--bg-panel); color: var(--text-main); cursor: pointer; transition: all 0.1s; overflow: hidden; height: 34px;
             user-select: none; min-width: 0;
         }
         .btn-fancy:hover { border-color: var(--accent); transform: translateY(-1px); }
         .btn-fancy:active { transform: translateY(0); }
         
         .btn-fancy-icon { width: 34px; background: rgba(125,125,125,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; border-right: 1px solid var(--border); flex-shrink: 0; }
-        .btn-fancy-text { flex: 1; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 0.85rem; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-fancy-text { flex: 1; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 0.85rem; padding: 0 10px; white-space: nowrap; }
         
         .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
         .btn-primary .btn-fancy-icon { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.1); }
         .btn-primary:hover { background: var(--accent-hover); }
-        .btn-success { background: var(--success); color: white; border-color: var(--success); }
-        .btn-success:hover { filter: brightness(1.1); }
-        .btn-success .btn-fancy-icon { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.1); }
-        .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
-        .btn-danger:hover { filter: brightness(1.1); }
-        
-        .btn-sm { height: 28px; font-size: 0.8rem; }
-        .btn-sm .btn-fancy-icon { width: 28px; font-size: 0.9rem; }
-        
-        .btn-square { width: 36px; padding: 0; justify-content: center; align-items: center; flex: 0 0 36px; }
-        .btn-square.btn-sm { width: 28px; flex: 0 0 28px; }
-        .btn-square .btn-fancy-icon { width: 100%; border: none; background: transparent; }
-        
-        .btn-floating { position: absolute; bottom: 20px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--accent); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: transform 0.2s; z-index: 10; }
-        .btn-floating:hover { transform: scale(1.1); background: var(--accent-hover); }
 
-        /* --- Panels --- */
+        .btn-sm { height: 26px; font-size: 0.8rem; }
+        .btn-sm .btn-fancy-icon { width: 26px; font-size: 0.9rem; }
+
+        .form-select, .form-input, textarea.form-input { 
+            width: 100%; background: var(--bg-panel); border: 1px solid var(--border); 
+            color: var(--text-main); padding: 5px 8px; border-radius: 4px; font-size: 0.85rem; font-family: inherit;
+        }
+        .form-input:focus { border-color: var(--accent); outline: none; }
+        .form-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- Header --- */
+        header { background: var(--bg-header); color: var(--text-light); height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); flex-shrink: 0; z-index:20; }
+        .branding { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+        .logo-text { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
+
+        /* --- Main Layout --- */
         main { flex: 1; display: flex; overflow: hidden; position: relative; }
-        
-        /* 2. CUSTOM RESIZE GRIP (Solid Triangle) */
-        .panel-input { 
-            width: 300px; min-width: 180px; max-width: 60%;
+
+        /* 1. Left Pane: Input */
+        .pane-left { 
+            width: 300px; min-width: 200px; max-width: 40%;
             background: var(--bg-panel); border-right: 1px solid var(--border); 
-            display: flex; flex-direction: column; z-index: 5; flex-shrink: 0;
-            
-            /* Chrome/Edge: overflow:scroll forces the resizer area to exist */
-            resize: horizontal; overflow: scroll; 
-            
-            /* Firefox: Visual Grip (Solid Triangle) */
-            scrollbar-width: none; 
+            display: flex; flex-direction: column; z-index: 10; flex-shrink: 0;
+            resize: horizontal; overflow: auto; scrollbar-width: none; position: relative;
+        }
+        .pane-left::-webkit-scrollbar { width: 0; height: 0; }
+        .pane-left::after {
+            content: ""; position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px;
             background-image: linear-gradient(135deg, transparent 50%, var(--border) 50%);
-            background-size: 12px 12px;
-            background-repeat: no-repeat;
-            background-position: bottom 2px right 2px;
+            background-size: 100% 100%; pointer-events: none; z-index: 50;
         }
-
-        /* Chrome/Edge: Hide scrollbars but keep resizer area */
-        .panel-input::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
-        .panel-input::-webkit-scrollbar-corner { background: transparent; }
+        .pane-left::-webkit-resizer { display: block; }
         
-        /* Chrome/Edge: Solid Triangle Grip */
-        .panel-input::-webkit-resizer {
-            background: transparent;
-            border-style: solid;
-            border-width: 6px; 
-            border-color: transparent var(--border) var(--border) transparent;
-        }
-
-        .panel-header { padding: 8px 15px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; background: var(--bg-panel); }
-        .header-actions { display: flex; gap: 5px; }
-
-        .input-container { position: relative; flex: 1; width: 100%; overflow: hidden; background: var(--bg-panel); }
+        .pane-header { padding: 0 12px; height: 42px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; background: var(--bg-panel); flex-shrink: 0; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        
+        .input-container { position: relative; flex: 1; width: 100%; overflow: hidden; background: var(--bg-body); }
         .input-backdrop, .input-textarea {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            width: 100%; height: 100%; margin: 0; padding: 15px; border: none;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.5; letter-spacing: 0;
-            white-space: pre-wrap; word-wrap: break-word; 
-            background: transparent;
-            overflow-y: scroll; box-sizing: border-box; 
+            width: 100%; height: 100%; margin: 0; padding: 15px 5px 15px 15px; border: none;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.5;
+            white-space: pre-wrap; word-wrap: break-word; background: transparent; overflow-y: scroll; 
         }
-        .input-backdrop { z-index: 1; color: transparent; pointer-events: none; } 
+        .input-backdrop { z-index: 1; color: transparent; pointer-events: none; }
         .input-textarea { z-index: 2; color: var(--text-main); resize: none; outline: none; }
         
         mark { color: transparent; border-radius: 2px; background: transparent; }
-        .mode-overview mark { background: var(--hl-active); }
-        .mode-ip mark.type-ip { background: var(--hl-active); }
-        .mode-ip mark:not(.type-ip) { background: var(--hl-dim); }
-        .mode-domain mark.type-domain { background: var(--hl-active); }
-        .mode-domain mark:not(.type-domain) { background: var(--hl-dim); }
-        .mode-hash mark.type-hash { background: var(--hl-active); }
-        .mode-hash mark:not(.type-hash) { background: var(--hl-dim); }
+        mark.type-ip { background: var(--hl-active); }
+        mark.type-domain { background: var(--hl-active); }
+        mark.type-hash { background: var(--hl-active); }
 
-        .panel-workspace { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-body); min-width: 0; }
-        .tabs { display: flex; background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 0 5px; overflow-x: auto; flex-shrink: 0; flex-wrap: wrap; }
-        .tab { padding: 12px 15px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); border-bottom: 3px solid transparent; white-space: nowrap; display: flex; align-items: center; gap: 8px; transition: color 0.2s; user-select: none; }
-        .tab:hover { color: var(--accent); }
-        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-        .badge { background: var(--border); color: var(--text-main); font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; min-width: 16px; text-align: center; font-weight: 700; }
-        .tab.active .badge { background: var(--accent); color: white; }
-
-        .sources-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .sources-header { padding: 8px 15px; background: var(--bg-body); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; gap: 10px; height: 38px; }
-        .sh-left { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; white-space: nowrap; }
-        .sh-right { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 1px; }
-        
-        .sources-container { flex: 1; overflow-y: auto; padding: 20px; }
-        .sources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
-        
-        /* Overview Dashboard */
-        .overview-dashboard { display: grid; grid-template-columns: 1fr; gap: 15px; align-items: start; }
-        @media (min-width: 1350px) { .overview-dashboard { grid-template-columns: repeat(3, 1fr); } }
-
-        .ov-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; max-height: 70vh; overflow: hidden; }
-        .ov-header { padding: 8px 12px; border-bottom: 1px solid var(--border); font-weight: 600; background: rgba(0,0,0,0.02); display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-main); cursor: pointer; align-items: center; }
-        .ov-header:hover { background: var(--bg-body); color: var(--accent); }
-        .ov-content { padding: 0; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 0.8rem; color: var(--text-muted); flex: 1; }
-        .ov-sub-title { padding: 4px 12px; font-size: 0.75rem; font-weight: 700; color: var(--text-main); background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); margin-top: -1px; }
-        .ov-row { padding: 3px 12px; border-bottom: 1px dashed var(--border); display: flex; align-items: center; justify-content: space-between; min-height: 24px; }
-        .ov-row:last-child { border-bottom: none; }
-        .ov-val { overflow: hidden; white-space: pre-wrap; word-break: break-all; flex: 1; pointer-events: auto; }
-        .ov-row.disabled { opacity: 0.6; }
-        .ov-row.disabled .ov-val { text-decoration: line-through; color: var(--text-muted); pointer-events: none; user-select: none; }
-        
-        .ov-toggle-btn { width: 14px; height: 14px; border: 1px solid var(--border); border-radius: 50%; cursor: pointer; margin-left: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-        .ov-toggle-btn:hover { border-color: var(--accent); }
-        .ov-toggle-btn::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: transparent; }
-        .ov-row:not(.disabled) .ov-toggle-btn::after { background: var(--success); }
-        .ov-row.disabled .ov-toggle-btn { border-color: var(--text-muted); opacity: 0.5; }
-        
-        /* Cards & Toolbar */
-        .source-card { 
-            background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); height: 45px;
-            padding: 0 8px; cursor: pointer; transition: all 0.1s; user-select: none; position: relative; 
-            display: flex; align-items: center; justify-content: flex-start; text-align: left; overflow: hidden;
+        /* 2. Center Pane: Workbench (Stack) */
+        .pane-center {
+            flex: 1; display: flex; flex-direction: column; min-width: 0; 
+            background: var(--bg-body); overflow: hidden; z-index: 5;
         }
-        .source-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-        .source-card.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.05); box-shadow: 0 0 0 1px var(--accent) inset; }
-        .source-name { font-size: 0.85rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 5px; flex: 1; }
-        .sc-indicator-lookup { position: absolute; top: 3px; right: 4px; font-size: 0.75rem; opacity: 0.7; }
-        .sc-indicator-fav { position: absolute; bottom: 3px; right: 4px; font-size: 0.75rem; color: #3b82f6; } 
-        
-        .toolbar { padding: 0 15px; height: 48px; background: var(--bg-panel); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; box-sizing: border-box; }
-        .toolbar-stats { display: flex; gap: 15px; font-size: 0.8rem; color: var(--text-muted); align-items: center; }
-        .stat-item { display: flex; align-items: center; line-height: 1; }
-        .stat-item span { color: var(--text-main); font-weight: 600; }
-        .toolbar-actions { display: flex; gap: 8px; }
+        /* Consistent flush padding */
+        .stack-list { 
+            flex: 1; overflow-y: auto; padding: 10px; gap: 15px; display: flex; flex-direction: column; 
+        }
 
-        /* Modals */
+        .stack-card { 
+            background: var(--bg-panel); 
+            border: 1px solid var(--border); 
+            border-radius: var(--radius); display: flex; flex-direction: column; 
+            transition: border-color 0.2s, box-shadow 0.2s; overflow: hidden; flex-shrink: 0;
+            cursor: pointer;
+        }
+        .stack-card.focused { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+        
+        .stack-header { 
+            padding: 10px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border); user-select: none; background: rgba(0,0,0,0.02);
+            transition: background 0.2s;
+        }
+        /* Fix empty card border thickness */
+        .stack-card.empty .stack-header { border-bottom: none; }
+        
+        .stack-card.focused .stack-header { background: var(--bg-body); }
+        .stack-title { font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .stack-count { font-size: 0.9rem; background: var(--border); padding: 1px 8px; border-radius: 10px; font-weight: 600; min-width: 24px; text-align: center; }
+        .stack-card.focused .stack-count { background: var(--accent); color: white; }
+
+        .stack-body { display: flex; flex-direction: column; }
+        
+        /* Workbench Entities */
+        .ent-row { border-bottom: 1px solid var(--border); display: flex; flex-direction: column; cursor: pointer; user-select: none; }
+        .ent-row:hover { background: rgba(255,255,255,0.02); }
+        .ent-row:last-child { border-bottom: none; }
+        
+        .ent-row.disabled { opacity: 0.6; }
+        .ent-row.disabled .ent-val { text-decoration: line-through; pointer-events: none; }
+        
+        .ent-header {
+            padding: 6px 12px; display: flex; align-items: center;
+            min-height: 36px; background: transparent; gap: 10px; justify-content: flex-start;
+        }
+        
+        .ent-left { display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 0 1 auto; }
+        .ent-val { font-family: 'Consolas', monospace; font-size: 0.85rem; color: var(--text-main); word-break: break-all; transition: color 0.1s; padding: 2px 0; cursor: pointer; }
+        .ent-val:hover { color: var(--accent); }
+        .ent-emoji { font-size: 0.9rem; pointer-events: none; }
+        
+        .ent-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
+        
+        .toggle-circle { width: 14px; height: 14px; border: 1px solid var(--text-muted); border-radius: 50%; cursor: pointer; flex-shrink: 0; position: relative; }
+        .toggle-circle:hover { border-color: var(--accent); }
+        .toggle-circle::after { content: ""; position:absolute; top:2px; left:2px; right:2px; bottom:2px; border-radius:50%; background:transparent; transition: background 0.2s; }
+        .ent-row:not(.disabled) .toggle-circle::after { background: var(--success); }
+        .ent-row:not(.disabled) .toggle-circle { border-color: var(--border); }
+        
+        .ent-arrow { 
+            border: solid var(--text-muted); border-width: 0 2px 2px 0; display: inline-block; padding: 3px; 
+            transform: rotate(45deg); transition: transform 0.2s; margin-bottom: 2px; pointer-events: none;
+        }
+        .ent-row.expanded .ent-arrow { transform: rotate(-135deg); margin-bottom: -2px; border-color: var(--accent); }
+
+        .ent-triage-body { 
+            display: none; padding: 10px 12px; background: rgba(0,0,0,0.15); 
+            border-top: 1px dashed var(--border); gap: 10px; flex-wrap: wrap; align-items: center; cursor: default;
+        }
+        .ent-row.expanded .ent-triage-body { display: flex; }
+        .ent-row.expanded .ent-header { background: rgba(59, 130, 246, 0.05); }
+
+        /* 3. Right Pane: Sources & Context */
+        .pane-right {
+            width: 250px; background: var(--bg-panel); border-left: 1px solid var(--border);
+            display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.3s; z-index: 10;
+        }
+        /* Consistent flush padding */
+        .sources-grid { padding: 10px; display: grid; grid-template-columns: 1fr; gap: 8px; overflow-y: auto; flex: 1; align-content: flex-start; background: var(--bg-body); }
+        
+        .source-btn {
+            display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--border); height: 34px;
+            border-radius: var(--radius); cursor: pointer; background: var(--bg-panel); 
+            font-size: 0.8rem; font-weight: 500; transition: all 0.1s;
+            position: relative; overflow: hidden;
+        }
+        .source-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .source-btn.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); box-shadow: inset 3px 0 0 var(--accent); }
+        .source-btn.edit-mode { border-style: dashed; }
+
+        .src-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+        /* Fixed width for icons container to prevent shifting */
+        .src-icons { display: flex; gap: 4px; margin-left: 5px; opacity: 0.8; font-size: 0.75rem; align-items: center; flex-shrink: 0; min-width: 45px; justify-content: flex-end; }
+        
+        .src-fav-icon { color: #3b82f6; transition: opacity 0.2s; cursor: pointer; padding: 2px; border-radius: 4px; }
+        .src-fav-icon:hover { background: var(--bg-hover); opacity: 1 !important; }
+        .src-fav-icon.faded { opacity: 0.2; }
+        .src-fav-icon.faded:hover { opacity: 1 !important; }
+
+        .add-src-panel { display:none; flex-direction: column; padding:15px; background:var(--bg-body); border-top:1px solid var(--border); gap:10px; }
+        .add-src-trigger { padding: 10px; border-top: 1px solid var(--border); background: var(--bg-panel); text-align: center; display: none; }
+        
+        /* Bottom Toolbar */
+        .toolbar { 
+            height: 48px; border-top: 1px solid var(--border); background: var(--bg-panel); 
+            display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 20; gap: 10px; flex-shrink: 0; 
+        }
+        .toolbar-stats { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 10px; align-items: center; white-space: nowrap; flex: 0 1 auto; overflow: hidden; }
+        .stat-val { color: var(--text-main); font-weight: 700; margin-left: 4px; }
+        .toolbar-actions { display: flex; gap: 10px; align-items: center; }
+        
+        /* Modals & Toggles */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .modal-overlay.open { display: flex; }
-        .modal { background: var(--bg-panel); width: 90%; max-width: 650px; height: 526px; max-height: 90vh; border-radius: var(--radius); display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden; border: 1px solid var(--border); }
-        
-        .modal-header { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-panel); color: var(--text-main); }
-        .modal-header h2 { margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-        
-        .modal-body { padding: 0; overflow-y: auto; flex: 1; display: flex; flex-direction: column; }
-        
-        .modal-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 20px; background: var(--bg-body); overflow-x: auto; flex-shrink: 0; }
-        .modal-tab { padding: 12px 15px; cursor: pointer; font-size: 0.9rem; border-bottom: 2px solid transparent; color: var(--text-muted); white-space: nowrap; }
-        .modal-tab.active { border-bottom-color: var(--accent); color: var(--accent); font-weight: 600; }
-        .modal-tab-content { padding: 20px; display: none; overflow-y: auto; flex:1; }
-        .modal-tab-content.active { display: block; }
+        .modal { background: var(--bg-panel); width: 90%; max-width: 650px; max-height: 90vh; border-radius: var(--radius); display: flex; flex-direction: column; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .modal-header { padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
 
-        /* Investigation & Settings */
-        .investigation-grid { display: grid; grid-template-columns: 2.5fr 1fr; height: 100%; overflow: hidden; }
-        .inv-column { display: flex; flex-direction: column; overflow: hidden; height: 100%; border-right: 1px solid var(--border); }
-        .inv-column:last-child { border-right: none; background: var(--bg-body); }
-        .inv-column-header { padding: 8px 12px; background: var(--bg-body); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
-        .inv-list { overflow-y: auto; flex: 1; padding: 0; }
-        .inv-item { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; background: var(--bg-panel); border-left: 3px solid transparent; transition: opacity 0.2s; }
-        .inv-item:hover { background: var(--bg-body); }
-        .inv-item-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .inv-val { font-family: 'Consolas', monospace; font-weight: 600; color: var(--accent); font-size: 0.9rem; word-break: break-all; min-width: 0; }
-        .inv-controls { display: flex; gap: 6px; align-items: center; }
-        .verdict-select { padding: 4px; border-radius: 4px; border: 1px solid var(--border); font-size: 0.8rem; background: var(--bg-panel); color: var(--text-main); width: 130px; }
-        .note-input { flex: 1; padding: 5px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.8rem; background: var(--bg-body); color: var(--text-main); min-width: 0; }
-        .note-input:focus { border-color: var(--accent); outline: none; background: var(--bg-panel); }
-
-        .manage-sources-container { display: flex; flex-direction: column; height: 100%; }
-        .ms-list { border: 1px solid var(--border); border-radius: 4px; overflow-y: auto; flex: 1; background: var(--bg-panel); }
-        .ms-item { display: grid; grid-template-columns: 1fr 100px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
-        .ms-fav { cursor: pointer; text-align: center; color: var(--border); transition: transform 0.2s; font-size: 1.1rem; opacity: 0.5; }
-        .ms-fav:hover { transform: scale(1.2); opacity: 0.8; }
-        .ms-fav.active { color: #3b82f6; opacity: 1; }
-        .ms-tag { font-size: 0.7rem; padding: 1px 4px; border-radius: 4px; margin-left:5px; text-transform: uppercase; font-weight: 700; }
-        .tag-custom { background: var(--accent); color: white; }
-        .tag-lookup { background: var(--border); color: var(--text-muted); }
-        .ms-actions-right { display:flex; align-items:center; gap:10px; justify-content: flex-end; }
+        .toggle-switch { position: relative; display: inline-block; width: 30px; height: 16px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .2s; border-radius: 16px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 10px; width: 10px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
+        input:checked + .toggle-slider { background-color: var(--accent); }
+        input:checked + .toggle-slider:before { transform: translateX(14px); }
         
-        .sub-tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x: auto; }
-        .sub-tab { padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-muted); transition: all 0.2s; white-space: nowrap; }
-        .sub-tab:hover { border-color: var(--accent); }
-        .sub-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+        input[type="checkbox"] { accent-color: var(--accent); }
 
-        .toast { position: fixed; bottom: var(--toast-y); right: 25px; background: #333; color: white; padding: 12px 20px; border-radius: 6px; z-index: 2000; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .toast { position: fixed; bottom: var(--toast-y); right: 25px; background: #333; color: white; padding: 12px 20px; border-radius: 6px; z-index: 2000; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; font-weight: 500; display: flex; align-items: center; gap: 8px; }
         .toast.visible { opacity: 1; transform: translateY(0); }
         .toast.success { background: var(--success); }
         .toast.error { background: var(--danger); }
-        .toast.warning { background: var(--warning); color: #000; }
 
-        .toggle-switch { position: relative; display: inline-block; width: 34px; height: 18px; vertical-align: middle; flex-shrink: 0; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .2s; border-radius: 20px; }
-        .toggle-slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
-        input:checked + .toggle-slider { background-color: var(--accent); }
-        input:checked + .toggle-slider:before { transform: translateX(16px); }
-
-        .hidden { display: none !important; }
-        .text-danger { color: var(--danger); }
-        .text-muted { color: var(--text-muted); }
-        .flex-gap { display: flex; gap: 10px; align-items: center; }
+        .backup-textarea { width: 100%; height: 50px; min-height: 50px; max-height: 200px; background: var(--bg-body); color: var(--accent); border: 1px solid var(--border); font-family: monospace; padding: 8px; font-size: 0.75rem; resize: vertical; margin-bottom: 10px; }
         
-        .form-group { margin-bottom: 10px; }
-        .form-group label { display: block; margin-bottom: 4px; font-size: 0.8rem; font-weight: 600; }
-        .form-input, .form-select { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-panel); color: var(--text-main); box-sizing: border-box; font-size: 0.9rem; }
-        .form-input:disabled { opacity: 0.5; cursor: not-allowed; background: var(--bg-body); }
-        .form-select-auto { width: auto; min-width: 120px; }
-        .form-select-sm { width: auto; min-width: 50px; }
+        /* Report Modal Specifics */
+        .report-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; background: var(--bg-body); padding: 10px; border-radius: 4px; border: 1px solid var(--border); }
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        .control-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
         
-        select:disabled { opacity: 0.5; background-color: var(--bg-body); color: var(--text-muted); cursor: not-allowed; }
-
-        .add-source-grid { display: grid; grid-template-columns: 0.5fr 1.5fr 100px; gap: 10px; }
-        .add-source-full { grid-column: 1 / -1; margin-top: -5px; } 
-        .settings-subheader { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 15px 0 10px 0; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
-
-        #report-content a { color: var(--accent); text-decoration: none; }
-        #report-content a:hover { text-decoration: underline; }
-
-        .report-controls-bar { padding: 10px 15px; background: var(--bg-body); border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 15px; font-size: 0.8rem; align-items: center; }
-        .report-control-item { display:flex; gap:8px; align-items:center; }
-        .report-control-label { margin:0; font-weight:500; }
-
-        .backup-container { background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border); border-radius: 6px; padding: 15px; margin-top: 20px; font-size: 0.85rem; display: none; }
-        .backup-desc { margin-bottom: 10px; line-height: 1.4; color: var(--text-muted); }
-        .backup-textarea { width: 100%; height: 80px; background: var(--bg-panel); color: var(--accent); border: 1px solid var(--border); font-family: monospace; padding: 8px; margin-bottom: 10px; font-size: 0.75rem; resize: vertical; }
-        
-        .close-modal { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
-
-        @media (min-width: 901px) {
-            .panel-input { height: auto !important; }
-            .add-source-grid { grid-template-columns: 0.5fr 1.5fr 100px; }
+        /* Grid Alignment for Options - Fixed 2 columns */
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* Strict 2 columns to align left/right sides */
+            gap: 5px 15px; /* vertical-gap horizontal-gap */
         }
 
+        .flex-gap { display: flex; align-items: center; gap: 10px; }
+        .flex-gap .form-select { width: auto; flex: initial; }
+        .report-controls .form-select { width: auto; }
+        .hidden { display: none !important; }
+        .text-muted { color: var(--text-muted); }
+        
         @media (max-width: 900px) {
             main { flex-direction: column; }
-            .panel-input { 
+            .pane-left { 
                 width: 100% !important; max-width: 100%; 
-                height: 20%; min-height: 80px; /* Resize enable */
-                max-height: 60%; 
-                border-right: none; border-bottom: 1px solid var(--border); 
-                resize: vertical; 
+                min-height: 100px; height: 120px; max-height: 50%; /* Adjusted height */
+                resize: vertical; border-right: none; border-bottom: 1px solid var(--border); 
             }
-            .investigation-grid { grid-template-columns: 1fr; }
-            .inv-column { border-right: none; border-bottom: 1px solid var(--border); }
-            .inv-column:last-child { height: auto; max-height: 250px; flex: none; }
-            .toolbar { height: auto; flex-wrap: wrap; gap: 10px; padding: 8px 15px; height: 50px; }
-            .toolbar-stats { width: auto; gap: 10px; flex-shrink: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 0.75rem; }
-            .toolbar-actions { width: auto; flex-shrink: 0; }
-            .btn-fancy { min-width: 0; }
+            .pane-left::after { display: block; cursor: ns-resize; }
             
-            .add-source-grid { grid-template-columns: 1fr; }
-            .add-source-full { margin-top: 0; }
-            #add-btn-row { flex-direction: column-reverse; gap: 10px; align-items: stretch; }
-            .tab { padding: 12px 8px; }
-            .tabs { justify-content: flex-start; }
-            .sources-container { padding: 15px; } 
-            .sources-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } 
-            .ms-item { grid-template-columns: 1fr 90px; }
+            /* Center pane fills remaining space, allows internal scroll */
+            .pane-center { flex: 1; height: auto; min-height: 0; overflow: hidden; z-index: 5; }
+            .stack-list { overflow-y: auto; height: 100%; }
+            
+            /* Increased height for mobile sources list */
+            .pane-right { width: 100%; border-left: none; border-top: 1px solid var(--border); height: 260px; overflow: hidden; z-index: 10; flex-shrink: 0;}
+            
+            /* Compact toolbar for mobile */
+            .toolbar { padding: 5px 10px; height: auto; flex-wrap: wrap; min-height: 48px; }
+            .toolbar-stats { margin-right: auto; }
         }
         
-        @media (max-width: 400px) {
-            #sources-header .btn-fancy-text { display: none; }
-            #sources-header .btn-fancy-icon { border-right: none; width: 100%; }
-            #sources-header .btn-fancy { width: 36px; padding: 0; justify-content: center; }
+        .theme-card {
+            border: 2px solid var(--border); padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; opacity: 0.7; transition: all 0.2s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
         }
+        .theme-card.active { opacity: 1; border-color: var(--accent); }
+        .theme-emoji { font-size: 1.5rem; }
     </style>
 </head>
 <body>
 
+<!-- Header -->
 <header>
-    <div class="branding" id="branding-btn">
-        <span style="font-size: 1.8rem;">🕵️‍♂️</span>
-        <div>
-            <div class="logo-text">TotalOSINT</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 400;">All-in-One Investigation Tool</div>
-        </div>
+    <div class="branding" onclick="hardReset()" tabindex="0" role="button" onkeydown="handleEnter(event, this)">
+        <span style="font-size: 1.5rem;">🕵️‍♂️</span>
+        <div class="logo-text" style="margin-left:8px;">TotalOSINT</div>
     </div>
-    <div class="nav-links">
-        <a href="https://github.com/jhatzimalis/TotalOSINT" target="_blank" class="nav-link" title="GitHub Repo">
-            <svg height="18" viewBox="0 0 16 16" width="18" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-            GitHub
-        </a>
-        <button class="icon-btn" id="settings-btn" title="Settings">⚙️</button>
+    <div style="display:flex; gap:10px;">
+        <button class="icon-btn" onclick="openSettings()" title="Settings">⚙️</button>
     </div>
 </header>
 
+<!-- Main Interface -->
 <main>
-    <!-- Left Panel: Input -->
-    <div class="panel-input" id="panel-input">
-        <div class="panel-header">
-            <span>Investigation Notes</span>
-            <div class="header-actions">
-                <button class="btn-fancy btn-sm btn-square" id="copy-input-btn" title="Copy Notes">
-                    <div class="btn-fancy-icon" style="width:100%; border:none;">📋</div>
-                </button>
-                <button class="btn-fancy btn-sm btn-square" id="clear-input-btn" title="Clear Notes & Reset">
-                    <div class="btn-fancy-icon" style="width:100%; border:none;">🗑️</div>
-                </button>
+    <!-- Left Pane: Input -->
+    <div class="pane-left" id="pane-left">
+        <div class="pane-header">
+            <span>Raw Data</span>
+            <div style="display:flex; gap:5px;">
+                <button class="icon-btn" onclick="copyInput()" title="Copy">📋</button>
+                <button class="icon-btn" onclick="hardReset()" title="Clear">🗑️</button>
             </div>
         </div>
         <div class="input-container">
-            <div class="input-backdrop mode-overview" id="input-backdrop"></div>
-            <textarea class="input-textarea" id="raw-input" placeholder="Paste notes or logs here...&#10;TotalOSINT will extract IP Addresses, Domains, URLs, and File Hashes automatically."></textarea>
+            <div class="input-backdrop" id="input-backdrop"></div>
+            <textarea class="input-textarea" id="raw-input" placeholder="Paste logs, notes, or text here..."></textarea>
         </div>
     </div>
 
-    <!-- Right Panel: Workspace -->
-    <div class="panel-workspace">
-        <div class="tabs">
-            <div class="tab active" data-type="overview">⚡ Overview</div>
-            <div class="tab" data-type="ip">IP Address <span class="badge" id="count-ip">0</span></div>
-            <div class="tab" data-type="domain">Domain / URL <span class="badge" id="count-domain">0</span></div>
-            <div class="tab" data-type="hash">File Hash <span class="badge" id="count-hash">0</span></div>
-            <div class="tab" data-type="bookmarks">Bookmarks</div>
+    <!-- Center Pane: Workbench -->
+    <div class="pane-center" id="stack-container">
+        <div class="pane-header">
+            <span>Workbench</span>
+            <button class="btn-fancy btn-sm" onclick="setFocus('bookmarks')">
+                <div class="btn-fancy-icon">🔖</div>
+                <div class="btn-fancy-text">Bookmarks</div>
+            </button>
         </div>
+        <div class="stack-list" id="stack-list"></div>
+    </div>
 
-        <div class="sources-wrapper">
-            <!-- Source Toolbar (Overview) -->
-            <div class="sources-header hidden" id="overview-toolbar">
-                <div class="sh-left">Dashboard</div>
-                <div class="sh-right"></div>
-            </div>
-
-            <!-- Source Toolbar (Normal) -->
-            <div class="sources-header hidden" id="sources-header">
-                <div class="sh-left">Select Sources</div>
-                <div class="sh-right">
-                    <button class="btn-fancy btn-sm" id="select-all-btn" title="Select All Sources">
-                        <div class="btn-fancy-icon">☑️</div>
-                        <div class="btn-fancy-text">All</div>
-                    </button>
-                    <button class="btn-fancy btn-sm" id="deselect-all-btn" title="Deselect All Sources">
-                        <div class="btn-fancy-icon">⬜</div>
-                        <div class="btn-fancy-text">None</div>
-                    </button>
-                    <button class="btn-fancy btn-sm" id="sort-sources-btn" title="Sort Sources A-Z / Z-A">
-                        <div class="btn-fancy-icon">🔤</div>
-                        <div class="btn-fancy-text">Sort</div>
-                    </button>
-                    <button class="btn-fancy btn-sm" id="manage-sources-btn" title="Manage Sources">
-                        <div class="btn-fancy-icon">⚙️</div>
-                        <div class="btn-fancy-text">Manage</div>
-                    </button>
-                </div>
-            </div>
-
-            <div class="sources-container">
-                <div id="overview-dashboard" class="overview-dashboard"></div>
-                <div id="sources-grid" class="sources-grid hidden"></div>
-                <div id="no-data-msg" class="hidden" style="text-align: center; color: var(--text-muted); display: flex; flex-direction: column; justify-content: flex-start; align-items: center; height: 100%; padding: 15vh 20px 0 20px;"></div>
+    <!-- Right Pane: Sources -->
+    <div class="pane-right" id="pane-right">
+        <div class="pane-header">
+            <span id="ctx-header-title">Sources</span>
+            <div style="display:flex; gap:2px;">
+                <button class="icon-btn" id="ctx-edit-toggle" title="Edit Sources" onclick="toggleSourceEditMode()">✏️</button>
+                <button class="icon-btn" onclick="toggleSort()" title="Sort A-Z">🔤</button>
+                <button class="icon-btn" onclick="toggleSelectAll()" title="Toggle All">☑️</button>
             </div>
         </div>
+        
+        <div class="sources-grid" id="ctx-grid"></div>
+        
+        <div class="add-src-trigger" id="add-src-trigger">
+            <button class="btn-fancy" style="width:100%; justify-content:center;" onclick="openAddSource()">
+                <div class="btn-fancy-icon">➕</div>
+                <div class="btn-fancy-text">Add Source</div>
+            </button>
+        </div>
 
-        <div class="toolbar">
-            <div class="toolbar-stats" id="toolbar-stats">
-                <div class="stat-item" id="stat-item-entities">Entities:&nbsp;<span id="stat-entities">0</span></div>
-                <div style="opacity:0.3" id="stat-separator">|</div>
-                <div class="stat-item" id="stat-item-sources">Sources:&nbsp;<span id="stat-sources">0</span></div>
+        <div id="add-source-panel" class="add-src-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:5px; margin-bottom:5px;">
+                <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Edit / Add Source</div>
+                <button class="icon-btn hidden" id="src-delete-btn" style="color:var(--danger);" onclick="deleteSource()">🗑️</button>
             </div>
-            <div class="toolbar-actions hidden" id="toolbar-actions">
-                <button class="btn-fancy btn-square" id="launch-modal-open-btn" style="flex: 0 0 36px;" title="Open All Sources">
-                    <div class="btn-fancy-icon" style="border:none; width:100%;">🌐</div>
+            <input class="form-input" id="src-name" placeholder="Name">
+            <input class="form-input" id="src-url" placeholder="Home URL">
+            <input class="form-input" id="src-lookup" placeholder="Lookup URL (Optional)">
+            <input type="hidden" id="src-edit-id">
+            <div style="display:flex; gap:10px;">
+                <button class="btn-fancy btn-primary" onclick="saveSource()" style="flex:1; justify-content:center;">
+                    <div class="btn-fancy-text">Save</div>
                 </button>
-                <button class="btn-fancy btn-primary" id="launch-modal-btn" style="flex: 0 0 auto; min-width: 140px;">
-                    <div class="btn-fancy-icon">🚀</div>
-                    <div class="btn-fancy-text" id="launch-btn-text">Investigate</div>
+                <button class="btn-fancy" onclick="closeSourceForm()" style="flex:1; justify-content:center;">
+                    <div class="btn-fancy-text">Cancel</div>
                 </button>
             </div>
         </div>
     </div>
 </main>
 
-<!-- Investigation Modal -->
-<div class="modal-overlay" id="investigation-modal">
-    <div class="modal">
-        <div class="modal-header">
-            <h2>🔎 Investigation Workbench</h2>
-            <button class="icon-btn close-modal" style="color:var(--text-main); justify-self:end;">×</button>
-        </div>
-        <div class="modal-body">
-            <div class="investigation-grid">
-                <div class="inv-column">
-                    <div class="inv-column-header">
-                        <span>Extracted Entities (<span id="inv-entity-count">0</span>)</span>
-                        <div class="flex-gap" style="font-size:0.8rem; text-transform:none; font-weight:normal;">
-                             <label for="modal-defang">Defang</label>
-                             <label class="toggle-switch"> 
-                                <input type="checkbox" id="modal-defang"> 
-                                <span class="toggle-slider"></span> 
-                             </label>
-                        </div>
-                    </div>
-                    <div class="inv-list" id="inv-entity-list"></div>
-                </div>
-                <div class="inv-column" style="background:var(--bg-body);">
-                    <div class="inv-column-header">
-                        <span id="inv-source-count-display">Target Sources (0)</span>
-                    </div>
-                    <div class="inv-list" id="inv-source-list" style="padding: 10px; max-height: 200px;"></div>
-                    
-                    <div style="padding: 15px; display:flex; flex-direction:column; gap:10px; border-top:1px solid var(--border); background:var(--bg-panel); flex:none; margin-top: auto;">
-                        <button class="btn-fancy btn-primary" id="execute-btn">
-                            <div class="btn-fancy-icon">🌐</div>
-                            <div class="btn-fancy-text">Open All Sources</div>
-                        </button>
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn-fancy" id="preview-report-btn" style="flex:1;">
-                                <div class="btn-fancy-icon">📜</div>
-                                <div class="btn-fancy-text">Report</div>
-                            </button>
-                            <button class="btn-fancy btn-square" id="generate-report-btn" title="Copy Report">
-                                <div class="btn-fancy-icon" style="width:100%; border:none;">📋</div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="toolbar">
+    <div class="toolbar-stats">
+        <span>Entities: <span id="stat-ent" class="stat-val">0</span></span>
+        <span style="opacity:0.3">|</span>
+        <span>Selected: <span id="stat-sel" class="stat-val">0</span></span>
+    </div>
+    
+    <div class="toolbar-actions">
+        <button class="btn-fancy" onclick="openReportModal()">
+            <div class="btn-fancy-icon">📜</div>
+            <div class="btn-fancy-text">Report</div>
+        </button>
+        
+        <button class="btn-fancy btn-primary" onclick="executeInvestigation()">
+            <div class="btn-fancy-icon">🚀</div>
+            <div class="btn-fancy-text">Open</div>
+        </button>
     </div>
 </div>
 
 <!-- Report Modal -->
-<div class="modal-overlay" id="preview-modal" style="z-index: 1100;">
-    <div class="modal" style="max-width: 650px; height: 600px; position: relative;">
-        <!-- Header -->
+<div class="modal-overlay" id="report-modal">
+    <div class="modal">
         <div class="modal-header">
-            <h2 id="preview-title">Report</h2>
-            <button class="icon-btn close-modal" style="color:var(--text-main);">×</button>
+            <span>Investigation Report</span>
+            <button class="icon-btn" onclick="document.getElementById('report-modal').classList.remove('open')">×</button>
         </div>
-        
-        <div class="report-controls-bar">
-             <!-- Group 1: Mode -->
-             <div class="report-control-item">
-                <select class="form-select form-select-auto" id="preview-mode" style="padding:2px 6px; font-size:0.8rem; height: 26px; font-weight:600;">
-                    <option value="full">Full Report</option>
-                    <option value="simple">Simple List</option>
-                </select>
-             </div>
-
-             <!-- Group 2: Common -->
-             <div class="report-control-item">
-                <span class="report-control-label">Defang</span>
-                <label class="toggle-switch"> <input type="checkbox" id="preview-defang"> <span class="toggle-slider"></span> </label>
-             </div>
-             <div class="report-control-item">
-                <span class="report-control-label">Refs</span>
-                <label class="toggle-switch"> <input type="checkbox" id="preview-reference"> <span class="toggle-slider"></span> </label>
-             </div>
-
-             <!-- Group 3: Full Mode Options -->
-             <div id="controls-full" style="display:contents;">
-                 <div class="report-control-item">
-                    <span class="report-control-label">Verdict</span>
-                    <label class="toggle-switch"> <input type="checkbox" id="preview-verdict"> <span class="toggle-slider"></span> </label>
-                 </div>
-                 <div class="report-control-item">
-                    <span class="report-control-label">Space</span>
-                    <label class="toggle-switch"> <input type="checkbox" id="preview-addspace"> <span class="toggle-slider"></span> </label>
-                 </div>
-                 <div class="report-control-item">
-                     <select class="form-select form-select-auto" id="preview-sep-type" style="padding:2px 6px; font-size:0.8rem; height: 26px;">
-                        <option value="newline">Newline</option>
-                        <option value="dash">Hyphen (-)</option>
-                        <option value="eq">Equal (=)</option>
-                        <option value="us">Underscore (_)</option>
-                        <option value="comma">Comma</option>
-                    </select>
-                    <select class="form-select form-select-sm" id="preview-sep-len" style="padding:2px 6px; font-size:0.8rem; height: 26px;">
-                        <option value="3">3</option>
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="75">75</option>
-                    </select>
-                 </div>
-             </div>
-
-             <!-- Group 4: Formatting -->
-             <div style="flex:1; display:flex; justify-content:flex-end; gap:15px; align-items:center;">
-                <!-- Quotes applies to both modes (but only entities) -->
-                <div class="report-control-item">
-                    <span class="report-control-label">Quotes</span>
-                    <select class="form-select form-select-auto" id="preview-quotes" style="padding:2px 6px; font-size:0.8rem; height: 26px;">
-                        <option value="none">None</option>
-                        <option value="single">Single (')</option>
-                        <option value="double">Double (")</option>
+        <div class="modal-body" style="display:flex; flex-direction:column;">
+            <div class="report-controls">
+                <div class="control-group">
+                    <div class="control-label">Include</div>
+                    <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-inc-ip" checked> IP Address</label>
+                    <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-inc-domain" checked> Domain / URL</label>
+                    <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-inc-hash" checked> Hash</label>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">Format</div>
+                    <select class="form-select" id="rep-mode" onchange="generateReport()">
+                        <option value="full">Full Report</option>
+                        <option value="simple">Simple List</option>
                     </select>
                 </div>
-                <!-- List only applies to simple mode -->
-                <div class="report-control-item" id="controls-simple-list">
-                    <span class="report-control-label">List</span>
-                    <select class="form-select form-select-auto" id="preview-list" style="padding:2px 6px; font-size:0.8rem; height: 26px;">
-                        <option value="bullet-dash">Bullet (-)</option>
-                        <option value="bullet-star">Bullet (*)</option>
-                        <option value="newline">Newline</option>
-                        <option value="comma">Comma</option>
-                    </select>
-                </div>
-             </div>
-        </div>
 
-        <div class="modal-body" style="padding: 0; background: var(--bg-panel);">
-             <div id="report-content" style="width:100%; height:100%; padding:20px; font-family:'Consolas', monospace; outline:none; overflow:auto; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; word-break: break-all;"></div>
-             <button class="btn-floating" id="preview-copy-btn" title="Copy to Clipboard">📋</button>
+                <div class="control-group">
+                    <div class="control-label">Options</div>
+                    <div class="options-grid">
+                        <!-- Defang (Always Visible) -->
+                        <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-defang" checked> Defang</label>
+                        
+                        <!-- Full Report Options -->
+                        <div id="rep-opts-full" style="display:contents">
+                            <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-refs" checked> References</label>
+                            <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-verdict" checked> Verdicts</label>
+                            <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-space"> Space</label>
+                        </div>
+                        
+                        <!-- Simple List Options -->
+                        <div id="rep-opts-simple" style="display:contents">
+                            <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-simple-refs"> References</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shared Styling Row (Full Width) -->
+                <div class="control-group" style="grid-column: 1 / -1; margin-top:5px;">
+                    <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:center;">
+                        
+                        <!-- Quotes Dropdown (Shared - Now First) -->
+                        <div class="flex-gap" style="font-size:0.85rem;">
+                            <span style="font-weight:600; color:var(--text-muted);">Quotes:</span>
+                            <select class="form-select" id="rep-quote">
+                                <option value="">None</option>
+                                <option value="'">Single (')</option>
+                                <option value='"'>Double (")</option>
+                            </select>
+                        </div>
+
+                        <!-- Separator Dropdowns (Full Mode Only) -->
+                        <div id="rep-style-sep" class="flex-gap" style="font-size:0.85rem;">
+                            <span style="font-weight:600; color:var(--text-muted);">Sep:</span>
+                            <select class="form-select" id="rep-sep-type" onchange="toggleSepCount()">
+                                <option value="newline">Newline</option>
+                                <option value="dash">Hyphen (-)</option>
+                                <option value="eq">Equal (=)</option>
+                                <option value="us">Underscore (_)</option>
+                                <option value="comma">Comma</option>
+                            </select>
+                            <select class="form-select" id="rep-sep-count" onchange="generateReport()" disabled>
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="75">75</option>
+                            </select>
+                        </div>
+
+                        <!-- List Style Dropdown (Simple Mode Only) -->
+                        <div id="rep-style-list" class="flex-gap hidden" style="font-size:0.85rem;">
+                            <span style="font-weight:600; color:var(--text-muted);">List:</span>
+                            <select class="form-select" id="rep-list-style">
+                                <option value="bullet-">Bullet (-)</option>
+                                <option value="bullet*">Bullet (*)</option>
+                                <option value="newline">Newline</option>
+                                <option value="comma">Comma</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <textarea id="report-output" class="form-input" style="flex:1; resize:none; font-family:'Consolas', monospace; min-height:300px;" readonly></textarea>
+        </div>
+        <div style="padding:10px 15px; border-top:1px solid var(--border); display:flex; justify-content:flex-end;">
+            <button class="btn-fancy btn-primary" onclick="copyReport()">
+                <div class="btn-fancy-icon">📋</div>
+                <div class="btn-fancy-text">Copy to Clipboard</div>
+            </button>
         </div>
     </div>
 </div>
 
 <!-- Settings Modal -->
 <div class="modal-overlay" id="settings-modal">
-    <div class="modal" style="max-width: 650px; height: 526px; max-height: 90vh;">
+    <div class="modal" style="height:auto;">
         <div class="modal-header">
-            <h2>⚙️ Settings</h2>
-            <button class="icon-btn close-modal" style="color:var(--text-main); justify-self:end;">×</button>
+            <span>Settings</span>
+            <button class="icon-btn" onclick="document.getElementById('settings-modal').classList.remove('open')">×</button>
         </div>
-        <div class="modal-tabs">
-            <div class="modal-tab active" data-tab="appearance">Appearance</div>
-            <div class="modal-tab" data-tab="security">Security</div>
-            <div class="modal-tab" data-tab="sources">Manage Sources</div>
-        </div>
-
-        <div class="modal-body">
-            <!-- Appearance Tab -->
-            <div id="tab-appearance" class="modal-tab-content active">
-                <div class="settings-subheader">Application Theme</div>
-                <div class="form-group">
-                    <div style="display:flex; gap:15px; margin-top:10px;">
-                        <div style="flex:1; border:2px solid var(--border); padding:15px; border-radius:8px; cursor:pointer; text-align:center; opacity:0.7;" id="theme-card-light" onclick="setTheme('light')">
-                            <span style="font-size:2rem; display:block;">☀️</span>Light Mode
-                        </div>
-                        <div style="flex:1; border:2px solid var(--border); padding:15px; border-radius:8px; cursor:pointer; text-align:center; opacity:0.7;" id="theme-card-dark" onclick="setTheme('dark')">
-                            <span style="font-size:2rem; display:block;">🌙</span>Dark Mode
-                        </div>
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:20px;">
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">Application Theme</label>
+                <div style="display:flex; gap:15px;">
+                    <div class="theme-card" id="theme-card-dark" style="flex:1;" onclick="setTheme('dark')" tabindex="0" role="button" onkeydown="handleEnter(event, this)">
+                        <span class="theme-emoji">🌙</span>
+                        <span style="font-weight:600;">Dark Mode</span>
+                    </div>
+                    <div class="theme-card" id="theme-card-light" style="flex:1;" onclick="setTheme('light')" tabindex="0" role="button" onkeydown="handleEnter(event, this)">
+                        <span class="theme-emoji">☀️</span>
+                        <span style="font-weight:600;">Light Mode</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Security Tab -->
-             <div id="tab-security" class="modal-tab-content">
-                <div class="settings-subheader">Security</div>
-                <div class="form-group">
-                    <label>Global De-fang</label>
-                    <div class="flex-gap">
-                        <label class="toggle-switch"> <input type="checkbox" id="setting-defang"> <span class="toggle-slider"></span> </label>
-                        <span style="font-size:0.85rem; color:var(--text-muted);">Replace <code>.</code> with <code>[.]</code>, <code>http</code> with <code>hxxp</code>, etc.</span>
+            <div style="height:1px; background:var(--border); width:100%;"></div>
+
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">Security</label>
+                <div style="display:flex; align-items:center; gap:10px; background:var(--bg-body); padding:10px; border-radius:4px; border:1px solid var(--border);">
+                    <label class="toggle-switch"><input type="checkbox" id="set-defang"><span class="toggle-slider"></span></label>
+                    <div>
+                        <div style="font-weight:600; font-size:0.9rem;">Global Defang</div>
+                        <div class="text-muted" style="font-size:0.8rem;">Automatically defang indicators (e.g. 1[.]1[.]1[.]1 or hxxp[://]) in the UI, Copy, and Reports.</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Manage Sources Tab -->
-            <div id="tab-sources" class="modal-tab-content">
-                <div class="manage-sources-container">
-                    <div id="add-source-form-container" style="background: var(--bg-body); padding: 10px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 15px; display:none;">
-                        <div class="add-source-grid">
-                            <div class="form-group">
-                                <label>ID <span class="text-danger">*</span></label>
-                                <input type="text" class="form-input" id="cs-id" placeholder="ID" style="text-transform: uppercase;">
-                            </div>
-                            <div class="form-group">
-                                <label>Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-input" id="cs-name" placeholder="Tool Name">
-                            </div>
-                             <div class="form-group">
-                                <label>Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="cs-type" style="width: 100%;">
-                                    <option value="ip">IP</option>
-                                    <option value="domain">Domain</option>
-                                    <option value="hash">Hash</option>
-                                    <option value="bookmarks">Bookmark</option>
-                                </select>
-                            </div>
-                            <div class="form-group add-source-full">
-                                <label>Home URL <span class="text-danger">*</span></label>
-                                <input type="text" class="form-input" id="cs-home" placeholder="https://tool.com">
-                            </div>
-                            <div class="form-group add-source-full">
-                                <label>Lookup URL (Optional)</label>
-                                <input type="text" class="form-input" id="cs-lookup" placeholder="https://tool.com/search?q=">
-                            </div>
-                        </div>
-                        <div style="display:flex; gap:10px; margin-top:5px; justify-content: space-between;">
-                            <div style="display:flex; gap:10px;">
-                                <button class="btn-fancy btn-success" id="save-custom-source-btn" style="height:32px;">
-                                    <div class="btn-fancy-icon">💾</div>
-                                    <div class="btn-fancy-text" id="add-source-text">Save Source</div>
-                                </button>
-                                <button class="btn-fancy" id="cancel-edit-btn" style="height:32px; width:80px; flex:none;">
-                                    <div class="btn-fancy-text">Cancel</div>
-                                </button>
-                            </div>
-                            <button class="btn-fancy btn-danger hidden" id="delete-custom-source-btn" style="height:32px; width:40px; justify-content:center;">
-                                <div style="font-size:1.2rem;">🗑️</div>
-                            </button>
-                        </div>
-                    </div>
+            <div style="height:1px; background:var(--border); width:100%;"></div>
 
-                    <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;" id="add-btn-row">
-                        <div class="sub-tabs" style="margin:0; border:none; padding:0;">
-                            <div class="sub-tab active" onclick="filterManageSources('all')">All</div>
-                            <div class="sub-tab" onclick="filterManageSources('ip')">IP</div>
-                            <div class="sub-tab" onclick="filterManageSources('domain')">Domain/URL</div>
-                            <div class="sub-tab" onclick="filterManageSources('hash')">Hash</div>
-                            <div class="sub-tab" onclick="filterManageSources('bookmarks')">Bookmarks</div>
-                        </div>
-                        <button class="btn-fancy btn-sm" id="show-add-form-btn">
-                            <div class="btn-fancy-icon">➕</div>
-                            <div class="btn-fancy-text">Add Source</div>
-                        </button>
-                    </div>
-                    
-                    <div class="ms-list" id="manage-sources-list"></div>
-
-                    <div style="text-align: right; margin-top: 10px;">
-                        <a href="javascript:void(0)" id="backup-toggle-link" onclick="openBackupUI()" style="font-size:0.75rem; color:var(--text-muted); text-decoration:none;">Advanced / Backup</a>
-                    </div>
-                    
-                    <div id="backup-ui" class="backup-container">
-                        <div style="font-weight:700; margin-bottom:5px;">Backup & Restore</div>
-                        <div class="backup-desc">
-                            Save your custom sources and favorites to a local text file. <br>
-                            If you ever lose your local storage, you can use this to restore.
-                        </div>
-                        <textarea id="backup-text" class="backup-textarea" placeholder="Paste JSON here to restore..."></textarea>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn-fancy btn-sm" id="btn-do-backup-copy">
-                                <div class="btn-fancy-icon">📋</div>
-                                <div class="btn-fancy-text">Copy</div>
-                            </button>
-                            <button class="btn-fancy btn-sm btn-primary" id="btn-do-restore">
-                                <div class="btn-fancy-icon">🔄</div>
-                                <div class="btn-fancy-text">Restore</div>
-                            </button>
-                            <button class="btn-fancy btn-sm" onclick="closeBackupUI()">
-                                <div class="btn-fancy-text">Cancel</div>
-                            </button>
-                        </div>
-                    </div>
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">Data Backup / Restore</label>
+                <p class="text-muted" style="font-size:0.8rem; margin:0 0 10px 0;">Export your Custom Sources and Favorites to JSON text.</p>
+                <textarea id="backup-area" class="backup-textarea" placeholder="Paste JSON here to restore..."></textarea>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-fancy" onclick="generateBackup()">
+                        <div class="btn-fancy-icon">💾</div>
+                        <div class="btn-fancy-text">Generate Backup</div>
+                    </button>
+                    <button class="btn-fancy btn-primary" onclick="restoreBackup()">
+                         <div class="btn-fancy-icon">🔄</div>
+                        <div class="btn-fancy-text">Restore from Text</div>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast-el"></div>
 
-<!-- Data -->
-<script src="sources.js"></script>
 <script>
-    if (typeof sources === 'undefined') {
-        window.sources = {
-            ip: [ { id: 'AIPDB', name: 'AbuseIPDB', url: 'https://www.abuseipdb.com/', lookupurl: 'https://www.abuseipdb.com/check/' }, { id: 'IPQS', name: 'IPQualityScore', url: 'https://www.ipqualityscore.com/', lookupurl: 'https://www.ipqualityscore.com/vpn-ip-address-check/lookup/' }, { id: 'VT', name: 'VirusTotal', url: 'https://www.virustotal.com/', lookupurl: 'https://www.virustotal.com/gui/ip-address/' }, { id: 'GGL', name: 'Google Search', url: 'https://google.com', lookupurl: 'https://google.com/search?q=' } ],
-            domain: [ { id: 'URLSCAN', name: 'urlscan.io', url: 'https://urlscan.io/', lookupurl: 'https://urlscan.io/search/#' }, { id: 'BRWLR', name: 'Browserling', url: 'https://www.browserling.com/', lookupurl: 'https://www.browserling.com/browse/win10/chrome127/' }, { id: 'VT', name: 'VirusTotal', url: 'https://www.virustotal.com/', lookupurl: 'https://www.virustotal.com/gui/domain/' }, { id: 'GGL', name: 'Google Search', url: 'https://google.com', lookupurl: 'https://google.com/search?q=' } ],
-            hash: [ { id: 'VT', name: 'VirusTotal', url: 'https://www.virustotal.com/', lookupurl: 'https://www.virustotal.com/gui/file/' }, { id: 'ARUN', name: 'Any.Run', url: 'https://app.any.run/', lookupurl: 'https://app.any.run/submissions/sample/' }, { id: 'HYBAN', name: 'Hybrid Analysis', url: 'https://www.hybrid-analysis.com', lookupurl: 'https://www.hybrid-analysis.com/sample/' } ],
-            bookmarks: [ { id: 'GGADV', name: 'Google Adv Search', url: 'https://www.google.com/advanced_search' }, { id: 'HIBP', name: 'Have I Been Pwned', url: 'https://haveibeenpwned.com/' }, { id: 'OSFMW', name: 'OSINT Framework', url: 'https://osintframework.com/' }, { id: 'GOOS', name: 'Goosint', url: 'https://goosint.com/' }, { id: 'CYCHF', name: 'CyberChef', url: 'https://gchq.github.io/CyberChef/' } ]
+// --- Embedded Sources ---
+const sources = {
+    ip: [
+        { id: 'AIPDB', name: 'AbuseIPDB', url: 'https://www.abuseipdb.com/', lookupurl: 'https://www.abuseipdb.com/check/' },
+        { id: 'AVOTX', name: 'AlienVault OTX', url: 'https://otx.alienvault.com/', lookupurl: 'https://otx.alienvault.com/indicator/ip/' },
+        { id: 'APNIC', name: 'APNIC', url: 'https://wq.apnic.net/', lookupurl: 'https://wq.apnic.net/static/search.html?query=' },
+        { id: 'ARIN', name: 'ARIN', url: 'https://search.arin.net/rdap/', lookupurl: 'https://search.arin.net/rdap/?query=' },
+        { id: 'BGPV', name: 'BGPView', url: 'https://bgpview.io/', lookupurl: 'https://bgpview.io/ip/' },
+        { id: 'BRWLR', name: 'Browserling', url: 'https://www.browserling.com/', lookupurl: 'https://www.browserling.com/browse/win10/chrome127/' },
+        { id: 'CENS', name: 'Censys', url: 'https://search.censys.io/', lookupurl: 'https://search.censys.io/hosts/' },
+        { id: 'DNSLY', name: 'DNSlytics', url: 'https://dnslytics.com/', lookupurl: 'https://dnslytics.com/ip/' },
+        { id: 'GGLS', name: 'Google Search', url: 'https://www.google.com', lookupurl: 'https://www.google.com/search?q=site%3A' },
+        { id: 'GTREP', name: 'Google Transparency', url: 'https://transparencyreport.google.com/safe-browsing/search', lookupurl: 'https://transparencyreport.google.com/safe-browsing/search?url=' },
+        { id: 'GRNOI', name: 'GreyNoise', url: 'https://viz.greynoise.io/', lookupurl: 'https://viz.greynoise.io/ip/' },
+        { id: 'INXL', name: 'IntelX', url: 'https://intelx.io/', lookupurl: 'https://intelx.io/?s=' },
+        { id: 'IP2LOC', name: 'IP2Location', url: 'https://www.ip2location.com/', lookupurl: 'https://www.ip2location.com/demo/' },
+        { id: 'IPINF', name: 'IPinfo', url: 'https://ipinfo.io/', lookupurl: 'https://ipinfo.io/' },
+        { id: 'IPQS', name: 'IPQualityScore', url: 'https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test', lookupurl: 'https://www.ipqualityscore.com/vpn-ip-address-check/lookup/' },
+        { id: 'IPV', name: 'IPVoid', url: 'https://www.ipvoid.com/', lookupurl: 'https://www.ipvoid.com/scan/' },
+        { id: 'RIPE', name: 'RIPE NCC', url: 'https://www.ripe.net/' }, 
+        { id: 'SHDN', name: 'Shodan', url: 'https://www.shodan.io', lookupurl: 'https://www.shodan.io/host/' },
+        { id: 'SPUR', name: 'Spur', url: 'https://spur.us/' },
+        { id: 'TLS', name: 'Talos', url: 'https://talosintelligence.com', lookupurl: 'https://talosintelligence.com/reputation_center/lookup?search=' },
+        { id: 'THMNR', name: 'ThreatMiner', url: 'https://www.threatminer.org/', lookupurl: 'https://www.threatminer.org/host.php?q=' },
+        { id: 'URLV', name: 'URLVoid', url: 'https://www.urlvoid.com/', lookupurl: 'https://www.urlvoid.com/ip/' },
+        { id: 'VALKY', name: 'Valkyrie', url: 'https://verdict.valkyrie.comodo.com/', lookupurl: 'https://verdict.valkyrie.comodo.com/url/ip/result?ip=' },
+        { id: 'VT', name: 'VirusTotal', url: 'https://www.virustotal.com/gui/home/search', lookupurl: 'https://www.virustotal.com/gui/ip-address/' },
+        { id: 'WIGLE', name: 'WiGLE', url: 'https://wigle.net/' },
+        { id: 'WHOIS', name: 'Whois', url: 'https://www.whois.com/whois/', lookupurl: 'https://www.whois.com/whois/' },
+        { id: 'XFE', name: 'X-Force Exchange', url: 'https://exchange.xforce.ibmcloud.com/', lookupurl: 'https://exchange.xforce.ibmcloud.com/ip/' }
+    ],
+    domain: [
+        { id: 'AIPDB', name: 'AbuseIPDB', url: 'https://www.abuseipdb.com/', lookupurl: 'https://www.abuseipdb.com/check/' },
+        { id: 'AVOTX', name: 'AlienVault OTX', url: 'https://otx.alienvault.com/', lookupurl: 'https://otx.alienvault.com/indicator/domain/' },
+        { id: 'BRWLR', name: 'Browserling', url: 'https://www.browserling.com/', lookupurl: 'https://www.browserling.com/browse/win10/chrome127/' },
+        { id: 'CRT', name: 'crt.sh', url: 'https://crt.sh/' },
+        { id: 'DNSD', name: 'DNSDumpster', url: 'https://dnsdumpster.com/' },
+        { id: 'DNSLY', name: 'DNSlytics', url: 'https://dnslytics.com/', lookupurl: 'https://dnslytics.com/domain/' },
+        { id: 'DOMT', name: 'DomainTools', url: 'https://whois.domaintools.com/', lookupurl: 'https://whois.domaintools.com/' },
+        { id: 'GGLS', name: 'Google Search', url: 'https://www.google.com', lookupurl: 'https://www.google.com/search?q=site%3A' },
+        { id: 'GTREP', name: 'Google Transparency', url: 'https://transparencyreport.google.com/safe-browsing/search', lookupurl: 'https://transparencyreport.google.com/safe-browsing/search?url=' },
+        { id: 'HUNTR', name: 'Hunter.io', url: 'https://hunter.io/' },
+        { id: 'ICANN', name: 'ICANN Lookup', url: 'https://lookup.icann.org/' },
+        { id: 'INXL', name: 'IntelX', url: 'https://intelx.io/', lookupurl: 'https://intelx.io/?s=' },
+        { id: 'IPQS', name: 'IPQualityScore', url: 'https://www.ipqualityscore.com/domain-reputation', lookupurl: 'https://www.ipqualityscore.com/domain-reputation/' },
+        { id: 'SECTR', name: 'SecurityTrails', url: 'https://securitytrails.com/', lookupurl: 'https://securitytrails.com/domain/' },
+        { id: 'SHDN', name: 'Shodan', url: 'https://www.shodan.io', lookupurl: 'https://www.shodan.io/domain/' },
+        { id: 'TLS', name: 'Talos', url: 'https://talosintelligence.com', lookupurl: 'https://talosintelligence.com/reputation_center/lookup?search=' },
+        { id: 'THMNR', name: 'ThreatMiner', url: 'https://www.threatminer.org/', lookupurl: 'https://www.threatminer.org/domain.php?q=' },
+        { id: 'USIO', name: 'URLScan.io', url: 'https://urlscan.io', lookupurl: 'https://urlscan.io/domain/' },
+        { id: 'VALKY', name: 'Valkyrie', url: 'https://verdict.valkyrie.comodo.com/', lookupurl: 'https://verdict.valkyrie.comodo.com/url/domain/result?domain=' },
+        { id: 'VT', name: 'VirusTotal', url: 'https://www.virustotal.com/gui/home/search', lookupurl: 'https://www.virustotal.com/gui/domain/' },
+        { id: 'WBMAC', name: 'Wayback Machine', url: 'https://web.archive.org/', lookupurl: 'https://web.archive.org/web/*/' },
+        { id: 'WOT', name: 'Web of Trust', url: 'https://www.mywot.com/', lookupurl: 'https://www.mywot.com/en/scorecard/' },
+        { id: 'WHOIS', name: 'Whois', url: 'https://www.whois.com/whois/', lookupurl: 'https://www.whois.com/whois/' },
+        { id: 'WXAPI', name: 'WhoisXML API', url: 'https://whois.whoisxmlapi.com/', lookupurl: 'https://whois.whoisxmlapi.com/lookup/' },
+        { id: 'XFE', name: 'X-Force Exchange', url: 'https://exchange.xforce.ibmcloud.com/', lookupurl: 'https://exchange.xforce.ibmcloud.com/url/' }
+    ],
+    hash: [
+        { id: 'ARUN', name: 'Any.Run', url: 'https://app.any.run/', lookupurl: 'https://app.any.run/submissions/sample/' },
+        { id: 'CIRCL', name: 'CIRCL', url: 'https://hash.circl.lu/' },
+        { id: 'CKSAN', name: 'Cuckoo Sandbox', url: 'https://cuckoosandbox.org/', lookupurl: 'https://cuckoosandbox.org/sample/' },
+        { id: 'GGLS', name: 'Google Search', url: 'https://www.google.com', lookupurl: 'https://www.google.com/search?q=' },
+        { id: 'HYBAN', name: 'Hybrid Analysis', url: 'https://www.hybrid-analysis.com', lookupurl: 'https://www.hybrid-analysis.com/sample/' },
+        { id: 'JSBX', name: 'Joe Sandbox', url: 'https://www.joesandbox.com/', lookupurl: 'https://www.joesandbox.com/search?q=' },
+        { id: 'MLPRB', name: 'Malprob', url: 'https://malprob.io/', lookupurl: 'https://malprob.io/report/' },
+        { id: 'MLSHR', name: 'MalShare', url: 'https://malshare.com/', lookupurl: 'https://malshare.com/sample.php?hash=' },
+        { id: 'MLBZ', name: 'MalwareBazaar', url: 'https://bazaar.abuse.ch', lookupurl: 'https://bazaar.abuse.ch/sample/' },
+        { id: 'METAD', name: 'MetaDefender', url: 'https://metadefender.opswat.com/', lookupurl: 'https://metadefender.opswat.com/results/file/' },
+        { id: 'NIST', name: 'NIST NSRL', url: 'https://www.nist.gov/itl/ssd/software-quality-group/national-software-reference-library-nsrl' },
+        { id: 'REVLAB', name: 'ReversingLabs', url: 'https://www.reversinglabs.com/', lookupurl: 'https://analysis.reversinglabs.com/sample/' },
+        { id: 'TLS', name: 'Talos', url: 'https://talosintelligence.com', lookupurl: 'https://talosintelligence.com/talos_file_reputation?s=' },
+        { id: 'THMNR', name: 'ThreatMiner', url: 'https://www.threatminer.org/', lookupurl: 'https://www.threatminer.org/sample.php?q=' },
+        { id: 'TRGE', name: 'Triage', url: 'https://tria.ge/', lookupurl: 'https://tria.ge/sample/' },
+        { id: 'VALHA', name: 'Valhalla', url: 'https://valhalla.nextron-systems.com/', lookupurl: 'https://valhalla.nextron-systems.com/sample/' },
+        { id: 'VALKY', name: 'Valkyrie', url: 'https://verdict.valkyrie.comodo.com/', lookupurl: 'https://verdict.valkyrie.comodo.com/file/result?s=' },
+        { id: 'VT', name: 'VirusTotal', url: 'https://www.virustotal.com/gui/home/search', lookupurl: 'https://www.virustotal.com/gui/file/' }
+    ],
+    bookmarks: [
+        { id: 'BCAT', name: 'Bellingcat', url: 'https://www.bellingcat.com/' },
+        { id: 'BING', name: 'Bing', url: 'https://www.bing.com/' },
+        { id: 'BLCKC', name: 'Blockchain', url: 'https://www.blockchain.com/explorer' },
+        { id: 'CHAT', name: 'ChatGPT', url: 'https://chatgpt.com/' },
+        { id: 'COPIL', name: 'Copilot', url: 'https://copilot.microsoft.com/' },
+        { id: 'CYCHF', name: 'CyberChef', url: 'https://gchq.github.io/CyberChef/' },
+        { id: 'CYLCT', name: 'Cylect', url: 'https://cylect.io/' },
+        { id: 'DDGO', name: 'DuckDuckGo', url: 'https://duckduckgo.com/' },
+        { id: 'GEMINI', name: 'Gemini', url: 'https://gemini.google.com/' },
+        { id: 'GGL', name: 'Google', url: 'https://www.google.com' },
+        { id: 'GGADV', name: 'Google Adv Search', url: 'https://www.google.com/advanced_search' },
+        { id: 'GGIMG', name: 'Google Images', url: 'https://images.google.com/' },
+        { id: 'GGTLT', name: 'Google Translate', url: 'https://translate.google.com'},
+        { id: 'GOOS', name: 'Goosint', url: 'https://goosint.com/' },
+        { id: 'HIBP', name: 'Have I Been Pwned', url: 'https://haveibeenpwned.com/' },
+        { id: 'LINKD', name: 'LinkedIn', url: 'https://www.linkedin.com/' },
+        { id: 'ONYPH', name: 'Onyphe', url: 'https://www.onyphe.io/' },
+        { id: 'OSFMW', name: 'OSINT Framework', url: 'https://osintframework.com/' },
+        { id: 'PSTBN', name: 'Pastebin', url: 'https://pastebin.com/' },
+        { id: 'PERPX', name: 'Perplexity', url: 'https://www.perplexity.ai/' },
+        { id: 'URLSH', name: 'URL Shortener', url: 'https://www.shorturl.at/' },
+        { id: 'WBMAC', name: 'Wayback Machine', url: 'https://web.archive.org/' },
+        { id: 'ZOOM', name: 'ZoomEye', url: 'https://www.zoomeye.org/' },
+        { id: 'QRSCN', name: 'QR Code scanner', url: 'https://4qrcode.com/scan-qr-code.php' }
+    ]
+};
+
+const app = {
+    data: { ip: [], domain: [], hash: [] },
+    verdicts: {},
+    disabled: {}, 
+    sources: {},          
+    customSources: [],    
+    favorites: [], 
+    expanded: new Set(), // Track open rows for persistence
+    selected: { ip: [], domain: [], hash: [], bookmarks: [] },
+    focusedType: 'bookmarks', 
+    editMode: false,
+    sortDesc: false,
+    settings: { theme: 'dark', defang: true }
+};
+
+// Regex patterns for IOC extraction
+const R = {
+    ipv4: /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\.|\[\.\]|\(\.\))){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g,
+    ipv6: /((?:[0-9a-fA-F]{1,4}(?::|\[:\])){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}(?::|\[:\])){1,7}(?::|\[:\])(?:[0-9a-fA-F]{1,4}(?:(?::|\[:\])[0-9a-fA-F]{1,4})*)?|::(?:[0-9a-fA-F]{1,4}(?:(?::|\[:\])[0-9a-fA-F]{1,4})*)?)/g,
+    url: /h(?:tt|xx)ps?(?::|\[:\])\/\/(?:[a-zA-Z0-9.\-]|\[\.\]|\(\.\))+\.(?:[a-zA-Z]{2,}|\[\.\][a-zA-Z]{2,}|\(\.\)[a-zA-Z]{2,})(?:\/[^\s<>"']*)?/g,
+    domain: /(?<![\w@\.\-\/])\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.|\[\.\]|\(\.\)))+[a-z]{2,63}\b/gi,
+    hash: /\b[a-fA-F0-9]{32}\b|\b[a-fA-F0-9]{40}\b|\b[a-fA-F0-9]{64}\b/g
+};
+
+const els = {
+    input: document.getElementById('raw-input'),
+    backdrop: document.getElementById('input-backdrop'),
+    stackList: document.getElementById('stack-list'),
+    ctxGrid: document.getElementById('ctx-grid'),
+    ctxTitle: document.getElementById('ctx-header-title'),
+    paneLeft: document.getElementById('pane-left')
+};
+
+// --- Initialization ---
+function init() {
+    loadState();
+    buildSourceList();
+    setupListeners();
+    renderStack();
+    renderContext();
+    updateStats();
+    els.input.focus();
+}
+
+function loadState() {
+    const s = localStorage.getItem('totalosint_settings');
+    if(s) try { app.settings = {...app.settings, ...JSON.parse(s)}; } catch(e){}
+    const c = localStorage.getItem('totalosint_custom_sources');
+    if(c) try { app.customSources = JSON.parse(c); } catch(e){}
+    const f = localStorage.getItem('totalosint_favorites');
+    if(f) try { app.favorites = JSON.parse(f); } catch(e){}
+
+    setTheme(app.settings.theme);
+    document.getElementById('set-defang').checked = app.settings.defang;
+}
+
+function saveState() {
+    localStorage.setItem('totalosint_settings', JSON.stringify(app.settings));
+    localStorage.setItem('totalosint_custom_sources', JSON.stringify(app.customSources));
+    localStorage.setItem('totalosint_favorites', JSON.stringify(app.favorites));
+}
+
+// --- Logic ---
+function buildSourceList() {
+    app.sources = JSON.parse(JSON.stringify(sources));
+    app.customSources.forEach(cs => {
+        if(app.sources[cs.type] && !app.sources[cs.type].find(x=>x.id===cs.id)) {
+            app.sources[cs.type].push({...cs, isCustom: true});
+        }
+    });
+}
+
+function cleanInput(val) {
+    if(!val) return val;
+    let s = val.replace(/\[\.\]/g, '.').replace(/\(\.\)/g, '.');
+    s = s.replace(/\[:\]/g, ':');
+    s = s.replace(/hxxp/gi, 'http');
+    s = s.replace(/\[\:\/\/\]/g, '://');
+    return s;
+}
+
+function analyzeInput() {
+    const text = els.input.value;
+    app.data = { ip: [], domain: [], hash: [] };
+    highlightInput();
+
+    // Fix de-sync: Force backdrop to match input scroll immediately after highlight update
+    setTimeout(() => { els.backdrop.scrollTop = els.input.scrollTop; }, 0);
+
+    if(!text.trim()) {
+        renderStack();
+        updateStats();
+        return;
+    }
+
+    // Extraction logic
+    const rawIPv6s = text.match(R.ipv6) || [];
+    const rawIPv4s = text.match(R.ipv4) || [];
+    const rawHashes = text.match(R.hash) || [];
+    const rawDomains = text.match(R.domain) || [];
+    const rawURLs = text.match(R.url) || [];
+
+    rawURLs.forEach(u => {
+        const clean = cleanInput(u.replace(/[.,;?!:)"'\]>]+$/, ""));
+        app.data.domain.push({ val: clean, sub: 'URL' });
+    });
+
+    [...new Set(rawDomains)].forEach(d => {
+        const c = cleanInput(d);
+        if(c.match(/^\d+\.\d+\.\d+\.\d+$/)) return;
+        app.data.domain.push({ val: c, sub: 'Domain' });
+    });
+
+    [...new Set(rawIPv6s)].forEach(ip => {
+        const c = cleanInput(ip);
+        if(/[0-9a-fA-F]/.test(c)) app.data.ip.push({ val: c, sub: 'IPv6' });
+    });
+    [...new Set(rawIPv4s)].forEach(ip => app.data.ip.push({ val: cleanInput(ip), sub: 'IPv4' }));
+
+    [...new Set(rawHashes)].forEach(h => {
+        let t = 'MD5';
+        if(h.length === 40) t = 'SHA-1';
+        if(h.length === 64) t = 'SHA-256';
+        app.data.hash.push({ val: h, sub: t });
+    });
+
+    ['ip','domain','hash'].forEach(k => {
+        const unique = new Map();
+        app.data[k].forEach(item => unique.set(item.val, item));
+        app.data[k] = Array.from(unique.values()).sort((a,b) => a.val.localeCompare(b.val));
+    });
+
+    // Auto-switch based on priority: IP > Domain > Hash
+    // If multiple types exist, priority takes precedence.
+    if (app.data.ip.length > 0) {
+        setFocus('ip');
+    } else if (app.data.domain.length > 0) {
+        setFocus('domain');
+    } else if (app.data.hash.length > 0) {
+        setFocus('hash');
+    }
+
+    renderStack();
+    updateStats();
+}
+
+function highlightInput() {
+    let text = els.input.value;
+    if(!text) { els.backdrop.innerHTML = ''; return; }
+    
+    text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const wrap = (t, rx, cls) => t.replace(rx, m => {
+        if(cls === 'type-ip' && m.includes(':') && !/[0-9a-fA-F]/.test(m)) return m;
+        return `<mark class="${cls}">${m}</mark>`
+    });
+    
+    text = wrap(text, R.hash, 'type-hash');
+    text = wrap(text, R.url, 'type-domain');
+    text = wrap(text, R.domain, 'type-domain');
+    text = wrap(text, R.ipv6, 'type-ip');
+    text = wrap(text, R.ipv4, 'type-ip');
+    els.backdrop.innerHTML = text.replace(/\n/g, '<br>') + '<br>';
+}
+
+// --- UI Rendering ---
+function renderStack() {
+    els.stackList.innerHTML = '';
+    const categories = ['ip', 'domain', 'hash'];
+
+    categories.forEach(cat => {
+        const items = app.data[cat] || [];
+        const isFocused = (app.focusedType === cat);
+        const isEmpty = items.length === 0;
+        
+        const card = document.createElement('div');
+        card.className = `stack-card ${isFocused ? 'focused' : ''} ${isEmpty ? 'empty' : ''}`;
+        card.dataset.cat = cat;
+        // A11y
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.onkeydown = (e) => handleEnter(e, card);
+
+        card.onclick = function(e) { 
+            if(this.contains(e.target)) setFocus(cat); 
         };
-    }
-</script>
-
-<script>
-    /* --- APP STATE --- */
-    const app = {
-        data: { ip: [], domain: [], hash: [] },
-        selectedSources: { ip: [], domain: [], hash: [], bookmarks: [] },
-        currentTab: 'overview',
-        manageFilter: 'all',
-        customSources: [],
-        favorites: [],
-        verdicts: {},
-        disabledEntities: {}, 
-        sortDesc: false, 
-        settings: { 
-            theme: 'dark', defang: true, sepType: 'newline', sepLen: '3', addSpace: false, 
-            showReference: true, showVerdict: true, 
-            reportMode: 'full', quoteType: 'none', listType: 'bullet-dash' 
-        },
-        editingId: null,
-        tempReport: ''
-    };
-
-    const HTML_WELCOME = `
-        <div style="font-size: 3rem; margin-bottom: 10px; opacity:0.8;">🔎</div>
-        <div style="font-size: 0.9rem; font-weight:500; margin-bottom: 8px; line-height: 1.5; color: var(--text-muted); opacity: 0.6;">Paste investigation notes<br>or continue to another tab.</div>
-    `;
-
-    /* --- DOM ELEMENTS --- */
-    const els = {
-        input: document.getElementById('raw-input'),
-        backdrop: document.getElementById('input-backdrop'),
-        grid: document.getElementById('sources-grid'),
-        sourcesHeader: document.getElementById('sources-header'),
-        ovHeader: document.getElementById('overview-toolbar'),
-        dashboard: document.getElementById('overview-dashboard'),
-        msg: document.getElementById('no-data-msg'),
-        tabs: document.querySelectorAll('.tab'),
-        counts: { ip: document.getElementById('count-ip'), domain: document.getElementById('count-domain'), hash: document.getElementById('count-hash') },
-        stats: { ent: document.getElementById('stat-entities'), src: document.getElementById('stat-sources'), itemEnt: document.getElementById('stat-item-entities'), itemSrc: document.getElementById('stat-item-sources'), sep: document.getElementById('stat-separator') },
-        toolbarActions: document.getElementById('toolbar-actions'),
-        launchBtns: { modal: document.getElementById('launch-modal-btn'), direct: document.getElementById('launch-modal-open-btn'), text: document.getElementById('launch-btn-text') },
-        modals: { inv: document.getElementById('investigation-modal'), settings: document.getElementById('settings-modal'), preview: document.getElementById('preview-modal') }
-    };
-
-    /* --- INITIALIZATION --- */
-    function init() {
-        if (typeof sources !== 'undefined') window.sources = sources;
-        loadSettings();
-        mergeSources();
-        setupEvents();
-        els.input.value = ''; 
-        els.input.focus();
-        renderOverview(); 
-        switchTab('overview');
-    }
-
-    function loadSettings() {
-        const s = localStorage.getItem('totalosint_settings');
-        if(s) app.settings = {...app.settings, ...JSON.parse(s)};
-        setTheme(app.settings.theme);
         
-        syncSettingsUI();
-
-        const cs = localStorage.getItem('totalosint_custom_sources');
-        if(cs) app.customSources = JSON.parse(cs);
-
-        const fav = localStorage.getItem('totalosint_favorites');
-        if(fav) app.favorites = JSON.parse(fav);
-    }
-
-    function syncSettingsUI() {
-        document.getElementById('setting-defang').checked = app.settings.defang;
-        document.getElementById('modal-defang').checked = app.settings.defang;
-        document.getElementById('preview-defang').checked = app.settings.defang;
-        document.getElementById('preview-reference').checked = app.settings.showReference;
-        document.getElementById('preview-verdict').checked = app.settings.showVerdict;
-        document.getElementById('preview-sep-type').value = app.settings.sepType;
-        document.getElementById('preview-sep-len').value = app.settings.sepLen;
-        document.getElementById('preview-addspace').checked = app.settings.addSpace;
+        let title = cat === 'ip' ? 'IP Addresses' : cat === 'domain' ? 'Domain / URLs' : 'Hashes';
         
-        document.getElementById('preview-mode').value = app.settings.reportMode;
-        document.getElementById('preview-quotes').value = app.settings.quoteType;
-        document.getElementById('preview-list').value = app.settings.listType;
+        card.innerHTML = `
+            <div class="stack-header">
+                <div class="stack-title">${title}</div>
+                <span class="stack-count">${items.length}</span>
+            </div>
+            <div class="stack-body"></div>
+        `;
+        els.stackList.appendChild(card);
+        const body = card.querySelector('.stack-body');
 
-        const isSimple = app.settings.reportMode === 'simple';
-        document.getElementById('controls-full').style.display = isSimple ? 'none' : 'contents';
-        // Only show List dropdown in Simple Mode (applies to Entity List)
-        document.getElementById('controls-simple-list').style.display = isSimple ? 'flex' : 'none';
-        
-        toggleReportDropdown();
-    }
+        const groups = {};
+        items.forEach(item => { if(!groups[item.sub]) groups[item.sub] = []; groups[item.sub].push(item.val); });
 
-    function saveSettings() { localStorage.setItem('totalosint_settings', JSON.stringify(app.settings)); }
-    function saveFavorites() { localStorage.setItem('totalosint_favorites', JSON.stringify(app.favorites)); }
-    
-    function setTheme(theme) {
-        app.settings.theme = theme;
-        if(theme === 'light') document.body.classList.add('theme-light');
-        else document.body.classList.remove('theme-light');
-        document.getElementById('theme-card-light').style.opacity = theme === 'light' ? '1' : '0.6';
-        document.getElementById('theme-card-light').style.borderColor = theme === 'light' ? 'var(--accent)' : 'var(--border)';
-        document.getElementById('theme-card-dark').style.opacity = theme === 'dark' ? '1' : '0.6';
-        document.getElementById('theme-card-dark').style.borderColor = theme === 'dark' ? 'var(--accent)' : 'var(--border)';
-        saveSettings();
-    }
+        Object.keys(groups).sort().forEach(sub => {
+            const subHeader = document.createElement('div');
+            subHeader.style.cssText = "font-size:0.7rem; font-weight:700; color:var(--text-muted); background:rgba(0,0,0,0.1); padding:4px 12px; border-bottom:1px solid var(--border); text-transform:uppercase;";
+            subHeader.innerText = sub;
+            body.appendChild(subHeader);
 
-    function mergeSources() {
-        app.customSources.forEach(cs => {
-            if(window.sources[cs.type] && !window.sources[cs.type].find(x => x.id === cs.id)) window.sources[cs.type].push(cs);
-        });
-    }
+            groups[sub].forEach(val => {
+                const displayVal = app.settings.defang ? defang(val) : val;
+                const v = app.verdicts[val] || { status: 'Untriaged', note: '' };
+                const disabled = app.disabled[val];
+                const isExpanded = app.expanded.has(val);
+                const vEmojis = { 'Malicious':'⛔','Suspicious':'⚠️','Low-Suspicion':'🟡','Clean':'✅','Unknown':'❓','Untriaged':'' };
 
-    function clearNotes() {
-        els.input.value = '';
-        els.input.focus();
-        analyzeInput();
-    }
-    
-    function softReset() {
-        clearNotes();
-        closeSourceForm();
-        app.data = { ip: [], domain: [], hash: [] };
-        app.verdicts = {};
-        app.disabledEntities = {};
-        renderOverview();
-        switchTab('overview');
-    }
-
-    /* --- ANALYSIS --- */
-    const R = {
-        ipv4: /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\.|\[\.\]|\(\.\))){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g,
-        ipv6: /((?:[0-9a-fA-F]{1,4}(?::|\[:\])){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}(?::|\[:\])){1,7}(?::|\[:\])(?:[0-9a-fA-F]{1,4}(?:(?::|\[:\])[0-9a-fA-F]{1,4})*)?|::(?:[0-9a-fA-F]{1,4}(?:(?::|\[:\])[0-9a-fA-F]{1,4})*)?)/g,
-        url: /h(?:tt|xx)ps?(?::|\[:\])\/\/(?:[a-zA-Z0-9.\-]|\[\.\]|\(\.\))+\.(?:[a-zA-Z]{2,}|\[\.\][a-zA-Z]{2,}|\(\.\)[a-zA-Z]{2,})(?:\/[^\s<>"']*)?/g,
-        domain: /(?<![\w@\.\-\/])\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.|\[\.\]|\(\.\)))+[a-z]{2,63}\b/gi,
-        hash: /\b[a-fA-F0-9]{32}\b|\b[a-fA-F0-9]{40}\b|\b[a-fA-F0-9]{64}\b/g
-    };
-
-    function onInputChanged() {
-        // Instant analysis on paste/type (delay removed per request)
-        generateHighlights(); 
-        analyzeInput();
-    }
-
-    function cleanInput(val) {
-        if(!val) return val;
-        let s = val.replace(/\[\.\]/g, '.').replace(/\(\.\)/g, '.');
-        s = s.replace(/\[:\]/g, ':');
-        s = s.replace(/hxxp/gi, 'http');
-        s = s.replace(/\[\:\/\/\]/g, '://');
-        return s;
-    }
-
-    function analyzeInput() {
-        const text = els.input.value;
-        app.data = { ip: [], domain: [], hash: [] };
-        
-        if(!text.trim()) {
-            ['ip','domain','hash'].forEach(k => els.counts[k].innerText = 0);
-            renderOverview();
-            generateHighlights(); 
-            return;
-        }
-
-        let rawURLs = text.match(R.url) || [];
-        rawURLs = rawURLs.map(u => u.replace(/[.,;?!:)"'\]>]+$/, ""));
-
-        const rawIPv6s = text.match(R.ipv6) || [];
-        const rawIPv4s = text.match(R.ipv4) || [];
-        const rawHashes = text.match(R.hash) || [];
-        const rawDomains = text.match(R.domain) || [];
-
-        // Identify domains that are already covered by URLs
-        const domainsInUrls = new Set();
-        const urlSet = new Set(rawURLs);
-        urlSet.forEach(u => {
-            const cleanU = cleanInput(u);
-            app.data.domain.push({ val: cleanU, type: 'URL' });
-            try {
-                const urlObj = new URL(cleanU.startsWith('http') ? cleanU : 'http://' + cleanU); 
-                const host = urlObj.hostname;
-                if (host) {
-                    domainsInUrls.add(host);
-                    domainsInUrls.add(host.replace(/^www\./, ''));
-                }
-            } catch(e) {}
-        });
-
-        [...new Set(rawDomains)].forEach(d => {
-             const cleanD = cleanInput(d);
-             if(cleanD.match(/^\d+\.\d+\.\d+\.\d+$/)) return;
-             if(domainsInUrls.has(cleanD) || domainsInUrls.has(cleanD.replace(/^www\./, ''))) return;
-             app.data.domain.push({ val: cleanD, type: 'Domain' });
-        });
-
-        [...new Set(rawIPv6s)].forEach(ip => {
-            const clean = cleanInput(ip);
-            // Strict check: Must have at least one Hex digit to be valid (ignores "::" etc)
-            if(!/[0-9a-fA-F]/.test(clean)) return;
-            app.data.ip.push({ val: clean, type: 'IPv6' });
-        });
-        
-        [...new Set(rawIPv4s)].forEach(ip => app.data.ip.push({ val: cleanInput(ip), type: 'IPv4' }));
-        
-        [...new Set(rawHashes)].forEach(h => {
-            let t = 'Hash';
-            if(h.length === 32) t = 'MD5';
-            else if(h.length === 40) t = 'SHA-1';
-            else if(h.length === 64) t = 'SHA-256';
-            app.data.hash.push({ val: h, type: t });
-        });
-        
-        app.data.domain = removeDuplicates(app.data.domain);
-        app.data.ip = removeDuplicates(app.data.ip);
-        app.data.hash = removeDuplicates(app.data.hash);
-
-        const sorter = (a, b) => a.val.localeCompare(b.val, undefined, { numeric: true });
-        app.data.ip.sort(sorter);
-        app.data.domain.sort(sorter);
-        app.data.hash.sort(sorter);
-
-        updateCounts();
-        if(app.currentTab === 'overview') renderOverview();
-        updateUI();
-        generateHighlights(); 
-    }
-
-    function applyDefang(val) {
-        if(!app.settings.defang) return val;
-        let s = val;
-        s = s.replace(/http/gi, 'hxxp');
-        s = s.replace(/:\/\//g, '___SCHEME___');
-        if (s.includes('.')) s = s.replace(/\./g, '[.]');
-        if (s.includes(':')) s = s.replace(/:/g, '[:]'); 
-        s = s.replace(/___SCHEME___/g, '[://]');
-        s = s.replace(/\[\[\.\]\]/g, '[.]');
-        return s;
-    }
-
-    function removeDuplicates(arr) {
-        const unique = new Set();
-        return arr.filter(item => {
-            const key = item.val + '|' + item.type;
-            if(unique.has(key)) return false;
-            unique.add(key);
-            return true;
-        });
-    }
-
-    function updateCounts() {
-        const filter = (arr) => arr.filter(x => !app.disabledEntities[x.val]).length;
-        els.counts.ip.innerText = filter(app.data.ip);
-        els.counts.domain.innerText = filter(app.data.domain);
-        els.counts.hash.innerText = filter(app.data.hash);
-        const total = filter(app.data.ip) + filter(app.data.domain) + filter(app.data.hash);
-        els.stats.ent.innerText = total;
-    }
-
-    function renderOverview() {
-        const dash = els.dashboard;
-        const totalItems = app.data.ip.length + app.data.domain.length + app.data.hash.length;
-
-        if(totalItems === 0) {
-             dash.style.display = 'none';
-             els.msg.innerHTML = HTML_WELCOME;
-             els.msg.classList.remove('hidden');
-             return;
-        }
-
-        // Bug Fix: Only force grid display if currently on overview tab
-        if(app.currentTab === 'overview') {
-            dash.style.display = 'grid';
-            els.msg.classList.add('hidden');
-        }
-
-        dash.innerHTML = '';
-
-        ['ip','domain','hash'].forEach(key => {
-             const items = app.data[key];
-             if(items.length === 0) return;
-             const activeCount = items.filter(x => !app.disabledEntities[x.val]).length;
-             const subgroups = {};
-             items.forEach(i => {
-                if(!subgroups[i.type]) subgroups[i.type] = [];
-                subgroups[i.type].push(i.val);
-             });
-
-             const card = document.createElement('div');
-             card.className = 'ov-card';
-             card.innerHTML = `<div class="ov-header" onclick="switchTab('${key}')"><span>${key === 'ip' ? 'IP Address' : key === 'domain' ? 'Domain / URL' : 'File Hash'}</span> <span>${activeCount} ➔</span></div>`;
-             
-             const content = document.createElement('div');
-             content.className = 'ov-content';
-             
-             Object.keys(subgroups).sort().forEach(subKey => {
-                content.innerHTML += `<div class="ov-sub-title">${subKey}</div>`;
-                subgroups[subKey].forEach(val => {
-                    const isDisabled = app.disabledEntities[val];
-                    const row = document.createElement('div');
-                    row.className = `ov-row ${isDisabled ? 'disabled' : ''}`;
-                    const displayVal = applyDefang(val);
-                    const safeVal = displayVal.replace(/"/g, '&quot;');
-                    
-                    row.innerHTML = `
-                        <span class="ov-val" title="${safeVal}">${safeVal}</span>
-                        <div class="ov-toggle-btn" onclick="toggleEntityDisable('${val.replace(/'/g, "\\'")}')" title="${isDisabled ? 'Enable' : 'Disable'}"></div>
-                    `;
-                    content.appendChild(row);
-                });
-             });
-             card.appendChild(content);
-             dash.appendChild(card);
-        });
-    }
-
-    window.toggleEntityDisable = (ent) => {
-        app.disabledEntities[ent] = !app.disabledEntities[ent];
-        updateCounts(); 
-        renderOverview(); 
-        generateHighlights(); 
-        updateUI();
-    };
-
-    function generateHighlights() {
-        let text = els.input.value;
-        if(!text) { els.backdrop.innerHTML = ''; return; }
-        text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        
-        const wrap = (t, rx, cls) => t.replace(rx, m => {
-            // Fix: Check for IPv6 validity (must contain hex) before highlighting
-            if(cls === 'type-ip' && m.includes(':') && !/[0-9a-fA-F]/.test(m)) return m;
-            
-            let clean = cleanInput(m);
-            if(app.disabledEntities[clean]) return m; 
-            return `<mark class="${cls}">${m}</mark>`;
-        });
-        
-        text = wrap(text, R.hash, 'type-hash');
-        text = wrap(text, R.url, 'type-domain'); 
-        text = wrap(text, R.domain, 'type-domain'); 
-        text = wrap(text, R.ipv6, 'type-ip');
-        text = wrap(text, R.ipv4, 'type-ip');
-        els.backdrop.innerHTML = text.replace(/\n/g, '<br>') + '<br>';
-    }
-
-    function syncScroll() { els.backdrop.scrollTop = els.input.scrollTop; }
-
-    function switchTab(type) {
-        app.currentTab = type;
-        els.tabs.forEach(t => t.classList.toggle('active', t.dataset.type === type));
-        
-        const isOverview = type === 'overview';
-        els.sourcesHeader.classList.toggle('hidden', isOverview);
-        els.ovHeader.classList.toggle('hidden', !isOverview);
-        els.backdrop.className = `input-backdrop mode-${type}`;
-
-        els.dashboard.style.display = 'none';
-        els.grid.classList.add('hidden');
-        els.toolbarActions.classList.add('hidden');
-        els.msg.classList.add('hidden');
-
-        if (type === 'overview') {
-            renderOverview(); 
-        } else {
-            els.grid.classList.remove('hidden');
-            if (type === 'bookmarks') {
-                els.toolbarActions.classList.remove('hidden');
-                els.launchBtns.modal.classList.add('hidden'); 
-                els.launchBtns.direct.title = "Open All Sources"; 
-                renderSources();
-            } else {
-                els.toolbarActions.classList.remove('hidden');
-                els.launchBtns.modal.classList.remove('hidden');
-                els.launchBtns.direct.title = "Open All Sources"; 
-                renderSources();
-            }
-        }
-        updateUI();
-    }
-
-    function renderSources() {
-        const list = window.sources[app.currentTab] || [];
-        list.sort((a,b) => app.sortDesc ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name));
-
-        els.grid.innerHTML = '';
-        list.forEach(src => {
-            const isSel = app.selectedSources[app.currentTab].includes(src.id);
-            const isFav = app.favorites.includes(src.id);
-            
-            const el = document.createElement('div');
-            el.className = `source-card ${isSel ? 'selected' : ''}`;
-            el.title = src.name; 
-            
-            let html = `<span class="source-name">${src.name}</span>`;
-            if(src.lookupurl) html += `<div class="sc-indicator-lookup">🔍</div>`;
-            if(isFav) html += `<div class="sc-indicator-fav">💙</div>`;
-
-            el.innerHTML = html;
-            el.onclick = () => toggleSource(src.id);
-            els.grid.appendChild(el);
-        });
-    }
-
-    function toggleSource(id) {
-        const arr = app.selectedSources[app.currentTab];
-        const idx = arr.indexOf(id);
-        if (idx > -1) arr.splice(idx, 1);
-        else arr.push(id);
-        renderSources();
-        updateUI();
-    }
-
-    function updateUI() {
-        const tab = app.currentTab;
-        const srcCount = app.selectedSources[tab]?.length || 0;
-        const activeTotal = (app.data.ip.filter(x=>!app.disabledEntities[x.val]).length) + 
-                          (app.data.domain.filter(x=>!app.disabledEntities[x.val]).length) + 
-                          (app.data.hash.filter(x=>!app.disabledEntities[x.val]).length);
-        const entCount = (tab === 'bookmarks' || tab === 'overview') ? activeTotal : (app.data[tab] || []).filter(x => !app.disabledEntities[x.val]).length || 0;
-
-        els.stats.ent.innerText = entCount;
-        els.stats.src.innerText = srcCount;
-        
-        const showStats = tab !== 'overview' && tab !== 'bookmarks';
-        els.stats.itemEnt.classList.toggle('hidden', !showStats && tab !== 'overview');
-        els.stats.itemSrc.classList.toggle('hidden', tab === 'overview');
-        els.stats.sep.classList.toggle('hidden', tab === 'overview' || tab === 'bookmarks');
-    }
-
-    function openInvestigation() {
-        const tab = app.currentTab;
-        if(tab === 'overview' || tab === 'bookmarks') return;
-
-        const sourceIds = app.selectedSources[tab];
-        if (sourceIds.length === 0) return toast("Select at least one source.", "error");
-        
-        renderInvestigationList();
-
-        const srcList = document.getElementById('inv-source-list');
-        srcList.innerHTML = '';
-        const activeSrc = window.sources[tab].filter(s => sourceIds.includes(s.id));
-        document.getElementById('inv-source-count-display').innerText = `Target Sources (${activeSrc.length})`;
-        activeSrc.forEach(s => {
-            srcList.innerHTML += `<div style="font-size:0.8rem; padding:3px 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">• ${s.name}</div>`;
-        });
-
-        els.modals.inv.classList.add('open');
-    }
-
-    function renderInvestigationList() {
-        const tab = app.currentTab;
-        if(!app.data[tab]) return;
-        const entities = app.data[tab].filter(e => !app.disabledEntities[e.val]);
-        
-        if(entities.length === 0) {
-            document.getElementById('inv-entity-count').innerText = 0;
-            document.getElementById('inv-entity-list').innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">No entities.</div>`;
-        } else {
-            document.getElementById('inv-entity-count').innerText = entities.length;
-            const list = document.getElementById('inv-entity-list');
-            list.innerHTML = '';
-
-            entities.forEach(entObj => {
-                const ent = entObj.val;
-                if(!app.verdicts[ent]) app.verdicts[ent] = { status: 'Untriaged', note: '' };
-                const v = app.verdicts[ent];
-                const displayEnt = applyDefang(ent);
+                const row = document.createElement('div');
+                row.className = `ent-row ${disabled ? 'disabled' : ''} ${isExpanded ? 'expanded' : ''}`;
                 
-                const div = document.createElement('div');
-                div.className = `inv-item`;
-                div.innerHTML = `
-                    <div class="inv-item-header">
-                        <span class="inv-val" title="${ent}">${displayEnt}</span>
-                        <div class="flex-gap" style="gap:5px;">
-                            <button class="icon-btn" title="Copy" style="font-size:0.9rem;" onclick="copyToClip('${displayEnt}', 'Copied!')">📋</button>
+                // A11y
+                row.setAttribute('tabindex', '0');
+                row.setAttribute('role', 'button');
+                row.onkeydown = (e) => handleEnter(e, row);
+
+                row.onclick = function(e) { 
+                    if(['INPUT','SELECT','BUTTON'].includes(e.target.tagName)) return;
+                    if(app.expanded.has(val)) app.expanded.delete(val);
+                    else app.expanded.add(val);
+                    renderStack();
+                };
+
+                row.innerHTML = `
+                    <div class="ent-header">
+                        <div class="ent-left">
+                            <span class="ent-emoji">${vEmojis[v.status] || ''}</span>
+                            <span class="ent-val" title="Click to Copy">${displayVal}</span>
+                        </div>
+                        <div class="ent-actions">
+                            <div class="toggle-circle" title="${disabled?'Enable':'Disable'}"></div>
+                            <div class="ent-arrow"></div>
                         </div>
                     </div>
-                    <div class="inv-controls">
-                        <select class="verdict-select" onchange="updateVerdict('${ent}', 'status', this.value)">
-                            <option value="Untriaged" ${v.status === 'Untriaged'?'selected':''}>Untriaged</option>
-                            <option value="Unknown" ${v.status === 'Unknown'?'selected':''}>❓ Unknown</option>
-                            <option value="Clean" ${v.status === 'Clean'?'selected':''}>✅ Clean</option>
-                            <option value="Low-Suspicion" ${v.status === 'Low-Suspicion'?'selected':''}>🟡 Low-Suspicion</option>
-                            <option value="Suspicious" ${v.status === 'Suspicious'?'selected':''}>⚠️ Suspicious</option>
-                            <option value="Malicious" ${v.status === 'Malicious'?'selected':''}>⛔ Malicious</option>
+                    <div class="ent-triage-body">
+                        <select class="form-select" style="width:140px; cursor:pointer;">
+                            <option value="Untriaged">Untriaged</option>
+                            <option value="Unknown">❓ Unknown</option>
+                            <option value="Clean">✅ Clean</option>
+                            <option value="Low-Suspicion">🟡 Low-Suspicion</option>
+                            <option value="Suspicious">⚠️ Suspicious</option>
+                            <option value="Malicious">⛔ Malicious</option>
                         </select>
-                        <input type="text" class="note-input" placeholder="Notes..." value="${v.note}" oninput="updateVerdict('${ent}', 'note', this.value)">
+                        <input class="form-input" style="flex:1; min-width:150px; cursor:text;" placeholder="Notes..." value="${v.note}">
+                        <button class="icon-btn" title="Copy">📋</button>
                     </div>
                 `;
-                list.appendChild(div);
-            });
-        }
-    }
+                
+                const valSpan = row.querySelector('.ent-val');
+                valSpan.onclick = (e) => { e.stopPropagation(); copyText(val, true); setFocus(cat); };
 
-    function executeInvestigation() {
-        const tab = app.currentTab;
-        const sourceIds = app.selectedSources[tab];
-        
-        if(tab === 'bookmarks') {
-            const allSrcs = window.sources.bookmarks || [];
-            const selected = allSrcs.filter(s => sourceIds.includes(s.id));
-            if(selected.length === 0) return toast("No bookmarks selected.", "error");
-            if(selected.length > 10 && !confirm(`Open ${selected.length} tabs?`)) return;
-            selected.forEach(s => window.open(s.url, '_blank'));
-            return;
-        }
+                const toggleBtn = row.querySelector('.toggle-circle');
+                toggleBtn.onclick = (e) => { e.stopPropagation(); toggleDisable(val); setFocus(cat); };
 
-        let entities = (app.data[tab] || []).filter(e => !app.disabledEntities[e.val]);
-        if(entities.length === 0) entities = [{val: ''}];
+                const triageBody = row.querySelector('.ent-triage-body');
+                triageBody.onclick = (e) => { e.stopPropagation(); };
 
-        if(sourceIds.length === 0) return toast("Select sources first.", "error");
+                const select = row.querySelector('select');
+                select.value = v.status;
+                select.onchange = (e) => updateVerdictStatus(val, e.target.value);
 
-        let urls = [];
-        entities.forEach(obj => {
-            const ent = obj.val;
-            window.sources[tab].filter(s => sourceIds.includes(s.id)).forEach(src => {
-                let target = src.url;
-                if (ent && ent.trim() !== '' && src.lookupurl && src.lookupurl.trim() !== '') {
-                    target = src.lookupurl + encodeURIComponent(ent);
-                }
-                urls.push(target);
+                const input = row.querySelector('input');
+                input.oninput = (e) => updateVerdictNote(val, e.target.value);
+
+                const copyBtn = row.querySelector('.icon-btn');
+                copyBtn.onclick = () => copyText(val, true);
+
+                body.appendChild(row);
             });
         });
+    });
+}
 
-        urls = [...new Set(urls)];
-        if(urls.length > 20 && !confirm(`Open ${urls.length} tabs?`)) return;
-        urls.forEach(u => window.open(u, '_blank'));
-    }
-
-    function getSeparator() {
-        const type = app.settings.sepType;
-        const len = parseInt(app.settings.sepLen) || 3;
-        const charMap = { 'dash': '-', 'eq': '=', 'us': '_' };
-        let char = charMap[type];
-
-        if(type === 'newline') return app.settings.addSpace ? '\n\n\n\n' : '\n\n';
-        if(type === 'comma') return app.settings.addSpace ? '\n\n,\n\n' : '\n,\n'; 
-
-        let line = char.repeat(len);
-        if(app.settings.addSpace) return `\n\n${line}\n\n`;
-        return `\n${line}\n`;
-    }
-
-    function buildReportText(forHtml = false) {
-        const entities = (app.data[app.currentTab] || []).filter(e => !app.disabledEntities[e.val]);
-        const sourceIds = app.selectedSources[app.currentTab];
-        const activeSources = window.sources[app.currentTab].filter(s => sourceIds.includes(s.id));
+function renderContext() {
+    const cat = app.focusedType;
+    els.ctxTitle.innerText = cat === 'bookmarks' ? 'Bookmarks' : `${cat.toUpperCase()} Sources`;
+    els.ctxGrid.innerHTML = '';
+    
+    let srcs = app.sources[cat] || [];
+    srcs.sort((a,b) => {
+        const favA = app.favorites.includes(a.id);
+        const favB = app.favorites.includes(b.id);
+        if(favA && !favB) return -1;
+        if(!favA && favB) return 1;
         
-        // Formatting options
-        const qMap = { 'none': '', 'single': "'", 'double': '"' };
-        const q = qMap[app.settings.quoteType] || '';
-        const listType = app.settings.listType;
+        // Case-insensitive sort
+        const nA = a.name.toLowerCase();
+        const nB = b.name.toLowerCase();
+        return app.sortDesc ? nB.localeCompare(nA) : nA.localeCompare(nB);
+    });
+    
+    srcs.forEach((s) => {
+        const btn = document.createElement('div');
+        const isSel = app.selected[cat] && app.selected[cat].includes(s.id);
+        const isFav = app.favorites.includes(s.id);
+        const isLookup = !!s.lookupurl;
+        
+        btn.className = `source-btn ${isSel ? 'selected' : ''} ${app.editMode ? 'edit-mode' : ''}`;
+        
+        // A11y
+        btn.setAttribute('tabindex', '0');
+        btn.setAttribute('role', 'button');
+        btn.onkeydown = (e) => handleEnter(e, btn);
 
-        // Helper for Entity Lists (Simple Mode)
-        const formatEntityList = (items) => {
-             if (items.length === 1) {
-                 return `${q}${items[0]}${q}`;
-             }
-             if(listType === 'comma') {
-                return items.map(val => `${q}${val}${q}`).join(', ');
-             } else {
-                let prefix = "";
-                if(listType === 'bullet-dash') prefix = "- ";
-                if(listType === 'bullet-star') prefix = "* ";
-                return items.map(val => `${prefix}${q}${val}${q}`).join('\n');
-             }
-        };
+        let heartHtml = '';
+        if(app.editMode) {
+             heartHtml = `<span class="src-fav-icon ${isFav ? '' : 'faded'}" onclick="event.stopPropagation(); toggleFav('${s.id}')">💙</span>`;
+        } else if (isFav) {
+             heartHtml = `<span class="src-fav-icon" onclick="event.stopPropagation(); toggleFav('${s.id}')">💙</span>`;
+        }
 
-        // Helper for Reference Lists (Always Bullet - or Single Line)
-        const formatRefList = (items, isHtml) => {
-            if (items.length === 1) {
-                const val = items[0];
-                if(isHtml) return `###LINK###${val}###LINK###`;
-                return val;
+        let editHtml = '';
+        if(app.editMode && s.isCustom) {
+            editHtml = `<button class="icon-btn" onclick="openEditSource('${cat}', '${s.id}')" style="font-size:0.8rem;">✏️</button>`;
+        }
+
+        btn.innerHTML = `
+            <span class="src-name">${s.name}</span>
+            <div class="src-icons">
+                ${heartHtml}
+                ${isLookup ? '<span>🔍</span>' : ''}
+                ${editHtml}
+            </div>
+        `;
+        
+        if(!app.editMode) {
+             btn.onclick = (e) => {
+                if(e.target.closest('.src-fav-icon')) return;
+                if(!app.selected[cat]) app.selected[cat] = [];
+                const arr = app.selected[cat];
+                if(arr.includes(s.id)) app.selected[cat] = arr.filter(x => x !== s.id);
+                else arr.push(s.id);
+                renderContext();
+                updateStats();
+            };
+        }
+        els.ctxGrid.appendChild(btn);
+    });
+}
+
+function setFocus(cat) {
+    app.focusedType = cat;
+    document.querySelectorAll('.stack-card').forEach(c => c.classList.toggle('focused', c.dataset.cat === cat));
+    renderContext();
+    updateStats();
+}
+
+function updateVerdictStatus(val, status) {
+    if(!app.verdicts[val]) app.verdicts[val] = { status: 'Untriaged', note: '' };
+    app.verdicts[val].status = status;
+    // Auto-expand this row to ensure the user can see their change if they want to add a note
+    app.expanded.add(val);
+    renderStack();
+}
+
+function updateVerdictNote(val, note) {
+    if(!app.verdicts[val]) app.verdicts[val] = { status: 'Untriaged', note: '' };
+    app.verdicts[val].note = note;
+}
+
+function toggleDisable(val) {
+    app.disabled[val] = !app.disabled[val];
+    renderStack();
+    updateStats();
+}
+
+function copyInput() { copyText(els.input.value); }
+
+function copyText(txt, applyDefangSetting = false) {
+    if(app.disabled[txt]) return; 
+    let finalTxt = txt;
+    if(applyDefangSetting && app.settings.defang) {
+        finalTxt = defang(txt);
+    }
+    navigator.clipboard.writeText(finalTxt);
+    showToast('Copied!', 'success');
+}
+
+function showToast(msg, type) {
+    const t = document.getElementById('toast-el');
+    t.innerHTML = `<span>${type==='success'?'✅':'⚠️'}</span> ${msg}`;
+    t.className = `toast visible ${type}`;
+    setTimeout(() => t.className = 'toast', 2000);
+}
+
+function updateStats() {
+    const total = app.data.ip.filter(x=>!app.disabled[x.val]).length + 
+                  app.data.domain.filter(x=>!app.disabled[x.val]).length + 
+                  app.data.hash.filter(x=>!app.disabled[x.val]).length;
+    document.getElementById('stat-ent').innerText = total;
+    document.getElementById('stat-sel').innerText = (app.selected[app.focusedType] || []).length;
+}
+
+// --- Source Management ---
+function toggleSourceEditMode() {
+    app.editMode = !app.editMode;
+    document.getElementById('ctx-edit-toggle').classList.toggle('active', app.editMode);
+    document.getElementById('add-src-trigger').style.display = app.editMode ? 'block' : 'none';
+    closeSourceForm();
+    renderContext();
+}
+
+document.addEventListener('click', function(e) {
+    const paneRight = document.getElementById('pane-right');
+    if(app.editMode && !paneRight.contains(e.target) && !e.target.closest('#ctx-edit-toggle')) {
+        toggleSourceEditMode();
+    }
+});
+
+function openAddSource() {
+    closeSourceForm();
+    document.getElementById('add-src-trigger').style.display = 'none';
+    document.getElementById('add-source-panel').style.display = 'flex';
+    document.getElementById('src-delete-btn').classList.add('hidden');
+    setTimeout(() => document.getElementById('pane-right').scrollTop = document.getElementById('pane-right').scrollHeight, 50);
+}
+
+function openEditSource(cat, id) {
+    const s = app.sources[cat].find(x => x.id === id);
+    if(!s) return;
+    document.getElementById('add-src-trigger').style.display = 'none';
+    document.getElementById('add-source-panel').style.display = 'flex';
+    document.getElementById('src-delete-btn').classList.remove('hidden');
+    document.getElementById('src-name').value = s.name;
+    document.getElementById('src-url').value = s.url;
+    document.getElementById('src-lookup').value = s.lookupurl || '';
+    document.getElementById('src-edit-id').value = s.id;
+    setTimeout(() => document.getElementById('pane-right').scrollTop = document.getElementById('pane-right').scrollHeight, 50);
+}
+
+function closeSourceForm() {
+    document.getElementById('add-source-panel').style.display = 'none';
+    if(app.editMode) document.getElementById('add-src-trigger').style.display = 'block';
+    document.getElementById('src-name').value = '';
+    document.getElementById('src-url').value = '';
+    document.getElementById('src-lookup').value = '';
+    document.getElementById('src-edit-id').value = '';
+}
+
+function saveSource() {
+    const name = document.getElementById('src-name').value;
+    const url = document.getElementById('src-url').value;
+    const lookup = document.getElementById('src-lookup').value;
+    const editId = document.getElementById('src-edit-id').value;
+    const cat = app.focusedType;
+
+    if(!name || !url) return showToast("Name and Home URL required", "error");
+
+    if(editId) {
+        let cIdx = app.customSources.findIndex(x => x.id === editId);
+        if(cIdx > -1) {
+            app.customSources[cIdx] = { id: editId, type: cat, name, url, lookupurl: lookup };
+        }
+    } else {
+        const id = name.toUpperCase().replace(/[^A-Z]/g, '').slice(0,5) + Math.floor(Math.random()*10000);
+        app.customSources.push({ id, type: cat, name, url, lookupurl: lookup });
+    }
+    
+    saveState();
+    buildSourceList();
+    renderContext();
+    closeSourceForm();
+    showToast("Source Saved", "success");
+}
+
+function deleteSource() {
+    const id = document.getElementById('src-edit-id').value;
+    if(!id || !confirm('Delete this custom source?')) return;
+    app.customSources = app.customSources.filter(s => s.id !== id);
+    saveState();
+    buildSourceList();
+    renderContext();
+    closeSourceForm();
+}
+
+function toggleFav(id) {
+    if(app.favorites.includes(id)) app.favorites = app.favorites.filter(x => x !== id);
+    else app.favorites.push(id);
+    saveState();
+    renderContext();
+}
+
+function toggleSelectAll() {
+    const cat = app.focusedType;
+    if(!app.sources[cat]) return;
+    
+    const allIds = app.sources[cat].map(s => s.id);
+    const currentlySelected = app.selected[cat] || [];
+    
+    if(currentlySelected.length > 0) app.selected[cat] = [];
+    else app.selected[cat] = [...allIds];
+    
+    renderContext();
+    updateStats();
+}
+
+function toggleSort() { app.sortDesc = !app.sortDesc; renderContext(); }
+
+function executeInvestigation() {
+    const cat = app.focusedType;
+    const selIds = app.selected[cat] || [];
+    
+    if(cat === 'bookmarks') {
+        if(selIds.length === 0) return showToast('Select bookmarks first.', 'error');
+        const tools = app.sources.bookmarks.filter(s => selIds.includes(s.id));
+        tools.forEach(t => window.open(t.url, '_blank'));
+        return;
+    }
+
+    const items = app.data[cat].filter(x => !app.disabled[x.val]);
+    if(items.length === 0) return showToast('No entities extracted.', 'error');
+    if(selIds.length === 0) return showToast('Select sources first.', 'error');
+
+    const uniqueUrls = new Set();
+    items.forEach(obj => {
+        app.sources[cat].filter(s => selIds.includes(s.id)).forEach(src => {
+            let u = src.url;
+            if(src.lookupurl) {
+                // IPv6 encoding fix: Do not encode colons for standard lookups unless tool specific
+                let safeVal = encodeURIComponent(obj.val);
+                if(obj.sub === 'IPv6') safeVal = obj.val; // Send raw colons
+                
+                u = src.lookupurl + safeVal;
             }
-            return items.map(val => {
-                if(isHtml) return `- ###LINK###${val}###LINK###`;
-                return `- ${val}`;
-            }).join('\n');
-        };
+            uniqueUrls.add(u);
+        });
+    });
 
-        // --- SIMPLE MODE ---
-        if (app.settings.reportMode === 'simple') {
-            let report = "";
+    const urls = Array.from(uniqueUrls);
+    if(urls.length > 20 && !confirm(`Open ${urls.length} tabs?`)) return;
+    urls.forEach(u => window.open(u, '_blank'));
+}
+
+// --- Reporting ---
+function openReportModal() {
+    document.getElementById('report-modal').classList.add('open');
+    toggleSepCount(); 
+    generateReport();
+    
+    const ids = ['rep-inc-ip','rep-inc-domain','rep-inc-hash','rep-mode','rep-defang','rep-refs','rep-verdict','rep-space','rep-list-style','rep-quote','rep-simple-refs'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.onchange = generateReport;
+    });
+}
+
+function toggleSepCount() {
+    const type = document.getElementById('rep-sep-type').value;
+    const countEl = document.getElementById('rep-sep-count');
+    const disabled = (type === 'newline' || type === 'comma');
+    countEl.disabled = disabled;
+    generateReport();
+}
+
+function generateReport() {
+    const mode = document.getElementById('rep-mode').value;
+    const isFull = mode === 'full';
+    
+    // Toggle hidden class instead of relying on !important override
+    const fullOpts = document.getElementById('rep-opts-full');
+    const simpleOpts = document.getElementById('rep-opts-simple');
+    const sepStyle = document.getElementById('rep-style-sep');
+    const listStyle = document.getElementById('rep-style-list');
+
+    if (isFull) {
+        fullOpts.classList.remove('hidden');
+        simpleOpts.classList.add('hidden');
+        sepStyle.classList.remove('hidden');
+        listStyle.classList.add('hidden');
+    } else {
+        fullOpts.classList.add('hidden');
+        simpleOpts.classList.remove('hidden');
+        sepStyle.classList.add('hidden');
+        listStyle.classList.remove('hidden');
+    }
+
+    const defangRep = document.getElementById('rep-defang').checked;
+    const quoteMap = { "":"",'\'':"'",'"':'"' };
+    const q = quoteMap[document.getElementById('rep-quote').value] || "";
+    
+    let blocks = [];
+    
+    const cats = [];
+    if(document.getElementById('rep-inc-ip').checked) cats.push('ip');
+    if(document.getElementById('rep-inc-domain').checked) cats.push('domain');
+    if(document.getElementById('rep-inc-hash').checked) cats.push('hash');
+
+    cats.forEach(cat => {
+        const items = app.data[cat].filter(x => !app.disabled[x.val]);
+        if(items.length === 0) return;
+        
+        let headerTitle = cat === 'ip' ? 'IP Addresses' : cat === 'domain' ? 'Domain / URLs' : 'Hashes';
+        let sectionText = "";
+        
+        if(isFull) {
+            const showRefs = document.getElementById('rep-refs').checked;
+            const showVerdict = document.getElementById('rep-verdict').checked;
+            const useSpace = document.getElementById('rep-space').checked;
+            const sepType = document.getElementById('rep-sep-type').value;
+            const sepCount = parseInt(document.getElementById('rep-sep-count').value);
             
-            // 1. List Entities (if any)
-            if (entities.length > 0) {
-                const groups = {};
-                entities.forEach(obj => {
-                    if(!groups[obj.type]) groups[obj.type] = [];
-                    groups[obj.type].push(applyDefang(obj.val));
-                });
+            sectionText += `===== ${headerTitle} =====\n\n`;
 
-                Object.keys(groups).sort().forEach(type => {
-                    const items = groups[type];
-                    if (items.length === 1) {
-                         report += `${type}s: ${formatEntityList(items)}\n\n`;
-                    } else {
-                         report += `${type}s:\n`;
-                         report += formatEntityList(items);
-                         report += "\n\n";
-                    }
-                });
+            let separator = "";
+            let fullSep = "";
+            
+            if (sepType === 'newline') {
+                fullSep = useSpace ? "\n\n\n\n" : "\n\n"; 
+            } else if (sepType === 'comma') {
+                fullSep = useSpace ? "\n\n,\n\n" : "\n,\n";
+            } else {
+                let char = '-';
+                if(sepType === 'eq') char = '=';
+                if(sepType === 'us') char = '_';
+                separator = char.repeat(sepCount);
+                
+                if (useSpace) fullSep = `\n\n${separator}\n\n`;
+                else fullSep = `\n${separator}\n`;
             }
 
-            // 2. List References
-            if (app.settings.showReference && activeSources.length > 0) {
-                let refUrls = [];
-                if (entities.length > 0) {
-                    entities.forEach(obj => {
-                        const ent = obj.val;
-                        activeSources.forEach(src => {
-                            let url = src.url;
-                            if (src.lookupurl && src.lookupurl.trim() !== '') {
-                                url = src.lookupurl + encodeURIComponent(ent);
+            let entryBlocks = [];
+
+            items.forEach((obj) => {
+                let entry = "";
+                const val = defangRep ? defang(obj.val) : obj.val;
+                const v = app.verdicts[obj.val] || { status: 'Untriaged' };
+                
+                entry += `${obj.sub}: ${q}${val}${q}`;
+                if(showVerdict) {
+                    entry += `\nVerdict: ${v.status}`;
+                    if(v.note) entry += `\nNote: ${v.note}`;
+                }
+                
+                if(showRefs) {
+                    const selIds = app.selected[cat] || [];
+                    const activeSrcs = app.sources[cat].filter(s => selIds.includes(s.id));
+                    if(activeSrcs.length > 0) {
+                        entry += `\nReferences:`;
+                        activeSrcs.forEach(src => {
+                            let u = src.url;
+                            if(src.lookupurl) {
+                                let safeVal = encodeURIComponent(obj.val);
+                                if(obj.sub === 'IPv6') safeVal = obj.val;
+                                u = src.lookupurl + safeVal;
                             }
-                            refUrls.push(url);
+                            if(defangRep) u = defang(u); 
+                            entry += `\n- ${u}`;
                         });
-                    });
-                } else {
-                    activeSources.forEach(src => refUrls.push(src.url));
-                }
-                refUrls = [...new Set(refUrls)];
-                
-                if (refUrls.length === 1) {
-                     report += "References: " + formatRefList(refUrls, forHtml);
-                } else {
-                     report += "References:\n" + formatRefList(refUrls, forHtml);
-                }
-            }
-            return report.trim();
-        }
-
-        // --- FULL MODE ---
-        let report = "";
-        const sep = getSeparator();
-        const showRefs = app.settings.showReference && activeSources.length > 0;
-        const showVerdict = app.settings.showVerdict; 
-
-        if (entities.length === 0) return "No entities.";
-
-        entities.forEach((obj, i) => {
-            const ent = obj.val;
-            const v = app.verdicts[ent] || { status: 'Untriaged', note: '' };
-            const displayEnt = applyDefang(ent);
-            
-            // Apply Quote setting to Entity Name in Full Mode
-            report += `${obj.type}: ${q}${displayEnt}${q}\n`;
-            
-            if(showVerdict) {
-                report += `Verdict: ${v.status}\n`;
-            }
-            if(v.note) report += `Note: ${v.note}\n`;
-            
-            if(showRefs) {
-                let currentRefs = [];
-                activeSources.forEach(src => {
-                    let url = src.url;
-                    if(ent && ent.trim() !== '' && src.lookupurl && src.lookupurl.trim() !== '') {
-                        url = src.lookupurl + encodeURIComponent(ent);
                     }
-                    currentRefs.push(url);
-                });
-                
-                if (currentRefs.length === 1) {
-                     report += "References: " + formatRefList(currentRefs, forHtml);
-                } else {
-                     report += "References:\n" + formatRefList(currentRefs, forHtml);
                 }
-            } else {
-                report = report.trimEnd();
-            }
+                entryBlocks.push(entry);
+            });
             
-            if(i < entities.length - 1) report += sep;
-        });
-        return report;
-    }
-
-    function generateReport() {
-        const report = buildReportText(false);
-        if(!report) return toast("Report empty.", "warning");
-        copyToClip(report);
-    }
-    
-    function previewReport() {
-        const entities = (app.data[app.currentTab] || []).filter(e => !app.disabledEntities[e.val]);
-        const sourceIds = app.selectedSources[app.currentTab];
-        
-        if(entities.length === 0 && sourceIds.length === 0) return toast("No entities or sources to report.", "warning");
-        
-        const modeSelect = document.getElementById('preview-mode');
-        // Always enable simple mode, even if no entities
-        modeSelect.disabled = false;
-        if(entities.length === 0) {
-             // Force simple mode if no entities (Full mode makes no sense without entities)
-             modeSelect.value = 'simple';
-             app.settings.reportMode = 'simple';
-             modeSelect.disabled = true; // Lock it to simple
-             modeSelect.title = "Full report requires entities";
+            sectionText += entryBlocks.join(fullSep);
+            
         } else {
-            modeSelect.title = "";
-        }
-        
-        refreshPreview();
-        els.modals.preview.classList.add('open');
-        syncSettingsUI(); 
-    }
+            const showRefsSimple = document.getElementById('rep-simple-refs').checked;
+            const style = document.getElementById('rep-list-style').value;
+            
+            sectionText += `===== ${headerTitle} =====\n\n`;
+            
+            const groups = {};
+            items.forEach(item => { if(!groups[item.sub]) groups[item.sub] = []; groups[item.sub].push(item.val); });
 
-    function refreshPreview() {
-        const report = buildReportText(true);
-        if(!report) {
-            document.getElementById('report-content').innerHTML = "No content generated.";
-            return;
-        }
-        const escaped = report.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        const linked = escaped.replace(/###LINK###(.*?)###LINK###/g, '<a href="$1" target="_blank">$1</a>');
-        document.getElementById('report-content').innerHTML = linked;
-        app.tempReport = buildReportText(false); 
-    }
+            let subBlocks = [];
 
-    window.updateVerdict = (ent, key, val) => {
-        if(!app.verdicts[ent]) app.verdicts[ent] = { status: 'Untriaged', note: '' };
-        app.verdicts[ent][key] = val;
-    };
-    window.copyToClip = (text, msg = 'Report copied!') => {
-        navigator.clipboard.writeText(text).then(() => toast(msg, "success"));
-    };
-    function toast(msg, type='info') {
-        const t = document.getElementById('toast');
-        t.innerHTML = `<span>${type === 'error' ? '⚠️' : type === 'warning' ? '⚠️' : '✅'}</span> ${msg}`;
-        t.className = `toast visible ${type}`;
-        setTimeout(() => t.classList.remove('visible'), 3000);
-    }
-
-    window.filterManageSources = (cat) => {
-        app.manageFilter = cat;
-        document.querySelectorAll('.sub-tab').forEach(t => {
-            if(t.innerText.toLowerCase() === cat || (cat==='all' && t.innerText==='All')) t.classList.add('active');
-            else t.classList.remove('active');
-        });
-        renderManageSources();
-    };
-
-    function renderManageSources() {
-        const list = document.getElementById('manage-sources-list');
-        list.innerHTML = '';
-        let all = [];
-        ['ip','domain','hash','bookmarks'].forEach(t => {
-            if(window.sources[t]) {
-                window.sources[t].forEach(s => {
-                    if(!all.find(x => x.id === s.id && x._cat === t)) all.push({...s, _cat: t});
+            Object.keys(groups).sort().forEach(sub => {
+                let subBlock = `${sub}s:\n`; 
+                const subItems = groups[sub].map(val => {
+                    const v = defangRep ? defang(val) : val;
+                    return `${q}${v}${q}`;
                 });
+
+                if(style === 'comma') subBlock += subItems.join(', ');
+                else {
+                    let prefix = "";
+                    if(style === 'bullet-') prefix = "- ";
+                    if(style === 'bullet*') prefix = "* ";
+                    subBlock += subItems.map(x => prefix + x).join('\n');
+                }
+                subBlocks.push(subBlock);
+            });
+
+            sectionText += subBlocks.join('\n\n');
+            
+            if(showRefsSimple) {
+                const allUrls = new Set();
+                const selIds = app.selected[cat] || [];
+                const activeSrcs = app.sources[cat].filter(s => selIds.includes(s.id));
+                items.forEach(obj => {
+                     activeSrcs.forEach(src => {
+                        let u = src.url;
+                        if(src.lookupurl) {
+                            let safeVal = encodeURIComponent(obj.val);
+                            if(obj.sub === 'IPv6') safeVal = obj.val;
+                            u = src.lookupurl + safeVal;
+                        }
+                        if(defangRep) u = defang(u);
+                        allUrls.add(u);
+                     });
+                });
+                if(allUrls.size > 0) {
+                    sectionText += "\n\nReferences:\n";
+                    sectionText += Array.from(allUrls).map(u => `- ${u}`).join('\n');
+                }
             }
-        });
-        if(app.manageFilter !== 'all') {
-            all = all.filter(x => x._cat === app.manageFilter);
         }
-        all.forEach(s => {
-            const isFav = app.favorites.includes(s.id);
-            const isCustom = app.customSources.find(c => c.id === s.id);
-            const div = document.createElement('div');
-            div.className = 'ms-item';
-            let tags = '';
-            if(isCustom) tags += `<span class="ms-tag tag-custom">Custom</span>`;
-            if(s.lookupurl) tags += `<span class="ms-tag tag-lookup">Lookup</span>`;
-            let displayUrl = s.url;
-            let displayLookup = s.lookupurl ? s.lookupurl : '';
-            div.innerHTML = `
-                <div>
-                    <div style="font-weight:600;">${s.name} ${tags}</div>
-                    <div style="font-size:0.75rem; color:var(--text-muted); word-break:break-all;">${displayUrl}</div>
-                    ${displayLookup ? `<div style="font-size:0.75rem; color:var(--text-muted); word-break:break-all;">${displayLookup}</div>` : ''}
-                </div>
-                <div class="ms-actions-right">
-                    ${isCustom ? `<button class="icon-btn" style="font-size:1rem;" onclick="editCustomSource('${s.id}')">✏️</button>` : ''}
-                    <div class="ms-fav ${isFav ? 'active' : ''}" onclick="toggleFavSetting('${s.id}')">❤️</div>
-                </div>
-            `;
-            list.appendChild(div);
-        });
-    }
+        blocks.push(sectionText);
+    });
 
-    window.toggleFavSetting = (id) => {
-        if(app.favorites.includes(id)) app.favorites = app.favorites.filter(x => x !== id);
-        else app.favorites.push(id);
-        saveFavorites();
-        renderManageSources();
-        if(app.currentTab !== 'overview') renderSources(); 
+    let finalText = blocks.join('\n\n\n');
+    if(!finalText) finalText = "No entities selected or available.";
+    document.getElementById('report-output').value = finalText;
+}
+
+function copyReport() { copyText(document.getElementById('report-output').value); }
+
+// --- Settings & Utils ---
+function openSettings() { document.getElementById('settings-modal').classList.add('open'); }
+function setTheme(t) {
+    app.settings.theme = t;
+    if(t==='light') document.body.classList.add('theme-light');
+    else document.body.classList.remove('theme-light');
+    document.getElementById('theme-card-dark').classList.toggle('active', t === 'dark');
+    document.getElementById('theme-card-light').classList.toggle('active', t === 'light');
+    saveState();
+}
+function generateBackup() {
+    const backup = { customSources: app.customSources, favorites: app.favorites };
+    document.getElementById('backup-area').value = JSON.stringify(backup, null, 2);
+    showToast("Backup Generated", "success");
+}
+function restoreBackup() {
+    try {
+        const j = JSON.parse(document.getElementById('backup-area').value);
+        if(j.customSources) app.customSources = j.customSources;
+        if(j.favorites) app.favorites = j.favorites;
+        saveState();
+        buildSourceList();
+        renderStack(); renderContext();
+        showToast("Restored!", "success");
+    } catch(e) { showToast("Invalid JSON", "error"); }
+}
+function defang(s) { 
+    return s.replace(/\./g, '[.]').replace(/:/g, '[:]').replace(/http/gi, 'hxxp').replace(/\[:\]\/\//g, '[://]'); 
+}
+function hardReset() { 
+    els.input.value = ''; 
+    analyzeInput(); 
+    els.input.focus();
+}
+
+// Helper: Debounce (Delay execution)
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
     };
+}
 
-    window.editCustomSource = (id) => {
-        const src = app.customSources.find(s => s.id === id);
-        if(!src) return;
-        document.getElementById('add-source-form-container').style.display = 'block';
-        document.getElementById('add-btn-row').style.display = 'none';
-        document.getElementById('delete-custom-source-btn').classList.remove('hidden');
-        document.getElementById('delete-custom-source-btn').onclick = () => removeCustomSource(id);
-        document.getElementById('cs-id').value = src.id;
-        document.getElementById('cs-name').value = src.name;
-        document.getElementById('cs-type').value = src.type;
-        document.getElementById('cs-home').value = src.url;
-        document.getElementById('cs-lookup').value = src.lookupurl;
-        document.getElementById('cs-type').onchange();
-        document.getElementById('cs-id').disabled = true; 
-        document.getElementById('add-source-text').innerText = "Save Changes";
-        document.getElementById('cancel-edit-btn').classList.remove('hidden');
-        app.editingId = id;
+// Helper: A11y Enter Key
+function handleEnter(e, el) {
+    if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        el.click();
+    }
+}
+
+// --- Responsive Resetter ---
+// Clears manual size styles when crossing breakpoints
+function setupResponsiveReset() {
+    const mq = window.matchMedia('(max-width: 900px)');
+    const reset = () => {
+        els.paneLeft.style.width = '';
+        els.paneLeft.style.height = '';
     };
-
-    function saveCustomSource() {
-        const id = document.getElementById('cs-id').value;
-        const name = document.getElementById('cs-name').value;
-        const type = document.getElementById('cs-type').value;
-        let home = document.getElementById('cs-home').value;
-        let lookup = document.getElementById('cs-lookup').value;
-        if(!id || !name || !home) return toast("ID, Name, and Home URL required", "error");
-        if(home && !home.startsWith('http')) home = 'https://' + home;
-        if(lookup && !lookup.startsWith('http')) lookup = 'https://' + lookup;
-        if(!app.editingId && app.customSources.find(c => c.id === id)) return toast("ID already exists", "error");
-        if(app.editingId) {
-            app.customSources = app.customSources.filter(s => s.id !== app.editingId);
-        }
-        const newSrc = { id, name, type, url: home, lookupurl: lookup || '' };
-        app.customSources.push(newSrc);
-        localStorage.setItem('totalosint_custom_sources', JSON.stringify(app.customSources));
-        if(window.sources[type]) {
-            window.sources[type] = window.sources[type].filter(s => s.id !== id);
-            window.sources[type].push(newSrc);
-        }
-        if(!app.favorites.includes(id)) {
-            app.favorites.push(id);
-            saveFavorites();
-        }
-        toast(app.editingId ? "Source updated!" : "Source added!", "success");
-        renderManageSources();
-        closeSourceForm();
-        if(app.currentTab === type) renderSources(); 
+    try {
+        mq.addEventListener('change', reset);
+    } catch(e) {
+        // Fallback for older browsers
+        mq.addListener(reset);
     }
+}
 
-    function removeCustomSource(id) {
-        if(!confirm("Delete this source?")) return;
-        if(app.editingId === id) closeSourceForm();
-        app.customSources = app.customSources.filter(s => s.id !== id);
-        localStorage.setItem('totalosint_custom_sources', JSON.stringify(app.customSources));
-        Object.keys(window.sources).forEach(key => {
-            window.sources[key] = window.sources[key].filter(s => s.id !== id);
-        });
-        renderManageSources();
-        renderSources();
-        toast("Source removed", "warning");
-    }
-
-    function closeSourceForm() {
-        document.getElementById('add-source-form-container').style.display = 'none';
-        document.getElementById('add-btn-row').style.display = 'flex';
-        document.getElementById('cs-id').value = '';
-        document.getElementById('cs-name').value = '';
-        document.getElementById('cs-home').value = '';
-        document.getElementById('cs-lookup').value = '';
-        document.getElementById('cs-id').disabled = false;
-        document.getElementById('add-source-text').innerText = "Save Source";
-        document.getElementById('delete-custom-source-btn').classList.add('hidden');
-        app.editingId = null;
-    }
-
-    window.openBackupUI = () => {
-        document.getElementById('backup-ui').style.display = 'block'; 
-        document.getElementById('backup-toggle-link').style.display = 'none';
-        const backup = { customSources: app.customSources, favorites: app.favorites };
-        document.getElementById('backup-text').value = JSON.stringify(backup, null, 2);
-    };
-
-    window.closeBackupUI = () => {
-        document.getElementById('backup-ui').style.display = 'none'; 
-        document.getElementById('backup-toggle-link').style.display = 'inline';
-    };
-
-    document.getElementById('btn-do-backup-copy').onclick = () => {
-        const txt = document.getElementById('backup-text').value;
-        if(txt) copyToClip(txt, "Backup copied!");
-    };
-
-    document.getElementById('btn-do-restore').onclick = () => {
-        const str = document.getElementById('backup-text').value;
-        if(!str.trim()) return toast("Paste JSON first", "error");
-        try {
-            const backup = JSON.parse(str);
-            if(backup.customSources && Array.isArray(backup.customSources)) {
-                app.customSources = backup.customSources;
-                localStorage.setItem('totalosint_custom_sources', JSON.stringify(app.customSources));
-            }
-            if(backup.favorites && Array.isArray(backup.favorites)) {
-                app.favorites = backup.favorites;
-                localStorage.setItem('totalosint_favorites', JSON.stringify(app.favorites));
-            }
-            toast("Restore successful!", "success");
-            init(); 
-            softReset(); 
-            renderManageSources();
-            closeBackupUI();
-        } catch(e) {
-            toast("Invalid JSON format", "error");
-        }
-    };
-
-    function toggleReportDropdown() {
-        const type = document.getElementById('preview-sep-type').value;
-        const disabled = (type === 'newline' || type === 'comma');
-        document.getElementById('preview-sep-len').disabled = disabled;
-        document.getElementById('preview-sep-len').style.opacity = disabled ? '0.5' : '1';
-    }
-
-    function setGlobalDefang(val) {
-        app.settings.defang = val;
-        saveSettings();
-        
-        document.getElementById('setting-defang').checked = val;
-        document.getElementById('modal-defang').checked = val;
-        document.getElementById('preview-defang').checked = val;
-
-        renderOverview();
-        if(app.currentTab !== 'overview') renderSources();
-        
-        if(els.modals.inv.classList.contains('open')) renderInvestigationList();
-        if(els.modals.preview.classList.contains('open')) refreshPreview();
-    }
-
-    function setupEvents() {
-        els.input.addEventListener('input', onInputChanged);
-        els.input.addEventListener('scroll', syncScroll);
-        
-        document.getElementById('branding-btn').onclick = softReset;
-        document.getElementById('clear-input-btn').onclick = softReset;
-        document.getElementById('copy-input-btn').onclick = () => copyToClip(els.input.value, 'Notes copied!');
-
-        document.getElementById('select-all-btn').onclick = () => { app.selectedSources[app.currentTab] = window.sources[app.currentTab].map(s => s.id); renderSources(); updateUI(); };
-        document.getElementById('deselect-all-btn').onclick = () => { app.selectedSources[app.currentTab] = []; renderSources(); updateUI(); };
-        document.getElementById('sort-sources-btn').onclick = () => { app.sortDesc = !app.sortDesc; renderSources(); };
-        document.getElementById('manage-sources-btn').onclick = () => { document.querySelector('.modal-tab[data-tab="sources"]').click(); els.modals.settings.classList.add('open'); };
-
-        els.tabs.forEach(t => t.onclick = () => switchTab(t.dataset.type));
-        
-        document.querySelectorAll('.close-modal').forEach(b => b.onclick = function(e) { 
-            e.stopPropagation(); 
-            this.closest('.modal-overlay').classList.remove('open');
-            closeBackupUI();
-        });
-        document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', (e) => { 
-            if(e.target === m) {
-                m.classList.remove('open');
-                closeBackupUI();
-            }
-        }));
-        
-        document.getElementById('settings-btn').onclick = () => { 
-            renderManageSources(); 
-            els.modals.settings.classList.add('open'); 
-        };
-        
-        document.getElementById('show-add-form-btn').onclick = () => { 
-            document.getElementById('add-source-form-container').style.display = 'block'; 
-            document.getElementById('add-btn-row').style.display = 'none';
-        };
-        document.getElementById('save-custom-source-btn').onclick = saveCustomSource;
-        document.getElementById('cancel-edit-btn').onclick = closeSourceForm;
-        
-        els.launchBtns.modal.onclick = openInvestigation;
-        els.launchBtns.direct.onclick = executeInvestigation;
-        document.getElementById('execute-btn').onclick = executeInvestigation;
-        document.getElementById('generate-report-btn').onclick = generateReport;
-        document.getElementById('preview-report-btn').onclick = previewReport;
-        document.getElementById('preview-copy-btn').onclick = () => copyToClip(app.tempReport);
-
-        document.querySelectorAll('.modal-tab').forEach(t => t.onclick = function() {
-            document.querySelectorAll('.modal-tab').forEach(x => x.classList.remove('active'));
-            document.querySelectorAll('.modal-tab-content').forEach(x => x.classList.remove('active'));
-            this.classList.add('active');
-            document.getElementById(`tab-${this.dataset.tab}`).classList.add('active');
-            if(this.dataset.tab === 'sources') renderManageSources();
-            closeBackupUI();
-        });
-
-        document.getElementById('setting-defang').onchange = (e) => setGlobalDefang(e.target.checked);
-        document.getElementById('modal-defang').onchange = (e) => setGlobalDefang(e.target.checked);
-        document.getElementById('preview-defang').onchange = (e) => setGlobalDefang(e.target.checked);
-        
-        ['reference','verdict','sep-type','sep-len','addspace', 'mode', 'quotes', 'list'].forEach(k => {
-             const el = document.getElementById(`preview-${k}`);
-             if(el) {
-                 el.onchange = (e) => {
-                     const keyMap = { 
-                         'reference':'showReference', 'verdict':'showVerdict', 
-                         'sep-type':'sepType', 'sep-len':'sepLen', 'addspace':'addSpace',
-                         'mode': 'reportMode', 'quotes': 'quoteType', 'list': 'listType'
-                     };
-                     const val = (e.target.type === 'checkbox') ? e.target.checked : e.target.value;
-                     app.settings[keyMap[k]] = val;
-                     syncSettingsUI(); saveSettings();
-                     refreshPreview();
-                 };
-             }
-        });
-
-        document.getElementById('cs-id').oninput = function() { this.value = this.value.toUpperCase().replace(/[^A-Z_]/g, ''); };
-        
-        const typeSelect = document.getElementById('cs-type');
-        const lookupInput = document.getElementById('cs-lookup');
-        typeSelect.onchange = () => {
-            if(typeSelect.value === 'bookmarks') {
-                lookupInput.disabled = true; lookupInput.value = ''; lookupInput.placeholder = 'N/A';
-            } else {
-                lookupInput.disabled = false; lookupInput.placeholder = 'https://tool.com/search?q=';
-            }
-        };
-    }
+function setupListeners() {
+    const input = els.input;
+    const backdrop = els.backdrop;
     
-    document.addEventListener('DOMContentLoaded', init);
+    // Debounce analysis for performance (300ms)
+    input.addEventListener('input', debounce(analyzeInput, 300));
+    
+    // Sync scroll instantly
+    input.addEventListener('scroll', () => { 
+        backdrop.scrollTop = input.scrollTop; 
+        backdrop.scrollLeft = input.scrollLeft; 
+    });
+    
+    document.getElementById('set-defang').onchange = (e) => { app.settings.defang = e.target.checked; saveState(); renderStack(); };
+    document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', (e) => { if(e.target===m) m.classList.remove('open'); }));
+    
+    setupResponsiveReset();
+}
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
