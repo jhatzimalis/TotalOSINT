@@ -147,7 +147,7 @@
         }
         /* Consistent flush padding */
         .stack-list { 
-            flex: 1; overflow-y: auto; padding: 10px; gap: 15px; display: flex; flex-direction: column; 
+            flex: 1; overflow-y: auto; padding: 10px; gap: 10px; display: flex; flex-direction: column;
         }
 
         .stack-card { 
@@ -191,6 +191,7 @@
         .ent-val { font-family: 'Consolas', monospace; font-size: 0.85rem; color: var(--text-main); word-break: break-all; transition: color 0.1s; padding: 2px 0; cursor: pointer; }
         .ent-val:hover { color: var(--accent); }
         .ent-emoji { font-size: 0.9rem; pointer-events: none; }
+        .ent-emoji:empty { display: none; }
         
         .ent-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
         
@@ -1208,33 +1209,54 @@ function executeInvestigation() {
         return;
     }
 
-    const items = app.data[cat].filter(x => !app.disabled[x.val]);
-    if(items.length === 0) return showToast('No entities extracted.', 'error');
     if(selIds.length === 0) return showToast('Select sources first.', 'error');
 
+    const items = app.data[cat].filter(x => !app.disabled[x.val]);
     const uniqueUrls = new Set();
-    items.forEach(obj => {
-        app.sources[cat].filter(s => selIds.includes(s.id)).forEach(src => {
-            let u = src.url;
-            if(src.lookupurl) {
-                // IPv6 encoding fix: Do not encode colons for standard lookups unless tool specific
-                let safeVal = encodeURIComponent(obj.val);
-                if(obj.sub === 'IPv6') safeVal = obj.val; // Send raw colons
-                
-                u = src.lookupurl + safeVal;
-            }
-            uniqueUrls.add(u);
+    
+    if (items.length > 0) {
+        // Entities exist: Generate Lookup URLs
+        items.forEach(obj => {
+            app.sources[cat].filter(s => selIds.includes(s.id)).forEach(src => {
+                let u = src.url;
+                if(src.lookupurl) {
+                    // IPv6 encoding fix: Do not encode colons for standard lookups unless tool specific
+                    let safeVal = encodeURIComponent(obj.val);
+                    if(obj.sub === 'IPv6') safeVal = obj.val; // Send raw colons
+                    
+                    u = src.lookupurl + safeVal;
+                }
+                uniqueUrls.add(u);
+            });
         });
-    });
+    } else {
+        // No entities: Open Base URLs of selected sources
+        app.sources[cat].filter(s => selIds.includes(s.id)).forEach(src => {
+            uniqueUrls.add(src.url);
+        });
+    }
 
     const urls = Array.from(uniqueUrls);
+    if(urls.length === 0) return showToast('No URLs generated.', 'error');
     if(urls.length > 20 && !confirm(`Open ${urls.length} tabs?`)) return;
     urls.forEach(u => window.open(u, '_blank'));
 }
 
 // --- Reporting ---
 function openReportModal() {
-    document.getElementById('report-modal').classList.add('open');
+    const modal = document.getElementById('report-modal');
+    modal.classList.add('open');
+    
+    // Check if any entities exist globally
+    const totalEntities = app.data.ip.length + app.data.domain.length + app.data.hash.length;
+    
+    if (totalEntities === 0) {
+        // Force Simple List and Check References to make UI useful for "Reference only" usage
+        document.getElementById('rep-mode').value = 'simple';
+        document.getElementById('rep-simple-refs').checked = true;
+        document.getElementById('rep-defang').checked = false; // No need to defang base URLs
+    }
+    
     toggleSepCount(); 
     generateReport();
     
@@ -1288,7 +1310,11 @@ function generateReport() {
 
     cats.forEach(cat => {
         const items = app.data[cat].filter(x => !app.disabled[x.val]);
-        if(items.length === 0) return;
+        const showRefsSimple = document.getElementById('rep-simple-refs').checked;
+        const onlyRefs = (items.length === 0 && mode === 'simple' && showRefsSimple);
+
+        // Skip category if empty AND we aren't just trying to list base references
+        if(items.length === 0 && !onlyRefs) return;
         
         let headerTitle = cat === 'ip' ? 'IP Addresses' : cat === 'domain' ? 'Domain / URLs' : 'Hashes';
         let sectionText = "";
@@ -1355,51 +1381,67 @@ function generateReport() {
             sectionText += entryBlocks.join(fullSep);
             
         } else {
-            const showRefsSimple = document.getElementById('rep-simple-refs').checked;
+            // Simple List Mode
             const style = document.getElementById('rep-list-style').value;
             
             sectionText += `===== ${headerTitle} =====\n\n`;
             
-            const groups = {};
-            items.forEach(item => { if(!groups[item.sub]) groups[item.sub] = []; groups[item.sub].push(item.val); });
+            if (items.length > 0) {
+                const groups = {};
+                items.forEach(item => { if(!groups[item.sub]) groups[item.sub] = []; groups[item.sub].push(item.val); });
 
-            let subBlocks = [];
+                let subBlocks = [];
 
-            Object.keys(groups).sort().forEach(sub => {
-                let subBlock = `${sub}s:\n`; 
-                const subItems = groups[sub].map(val => {
-                    const v = defangRep ? defang(val) : val;
-                    return `${q}${v}${q}`;
+                Object.keys(groups).sort().forEach(sub => {
+                    let subBlock = `${sub}s:\n`; 
+                    const subItems = groups[sub].map(val => {
+                        const v = defangRep ? defang(val) : val;
+                        return `${q}${v}${q}`;
+                    });
+
+                    if(style === 'comma') subBlock += subItems.join(', ');
+                    else {
+                        let prefix = "";
+                        if(style === 'bullet-') prefix = "- ";
+                        if(style === 'bullet*') prefix = "* ";
+                        subBlock += subItems.map(x => prefix + x).join('\n');
+                    }
+                    subBlocks.push(subBlock);
                 });
 
-                if(style === 'comma') subBlock += subItems.join(', ');
-                else {
-                    let prefix = "";
-                    if(style === 'bullet-') prefix = "- ";
-                    if(style === 'bullet*') prefix = "* ";
-                    subBlock += subItems.map(x => prefix + x).join('\n');
-                }
-                subBlocks.push(subBlock);
-            });
-
-            sectionText += subBlocks.join('\n\n');
+                sectionText += subBlocks.join('\n\n');
+            } else if (onlyRefs) {
+                sectionText += "(No Entities Extracted)\n";
+            }
             
             if(showRefsSimple) {
                 const allUrls = new Set();
                 const selIds = app.selected[cat] || [];
                 const activeSrcs = app.sources[cat].filter(s => selIds.includes(s.id));
-                items.forEach(obj => {
-                     activeSrcs.forEach(src => {
+                
+                if (items.length > 0) {
+                    // Generate specific lookup URLs
+                    items.forEach(obj => {
+                         activeSrcs.forEach(src => {
+                            let u = src.url;
+                            if(src.lookupurl) {
+                                let safeVal = encodeURIComponent(obj.val);
+                                if(obj.sub === 'IPv6') safeVal = obj.val;
+                                u = src.lookupurl + safeVal;
+                            }
+                            if(defangRep) u = defang(u);
+                            allUrls.add(u);
+                         });
+                    });
+                } else {
+                    // Generate Base URLs only
+                    activeSrcs.forEach(src => {
                         let u = src.url;
-                        if(src.lookupurl) {
-                            let safeVal = encodeURIComponent(obj.val);
-                            if(obj.sub === 'IPv6') safeVal = obj.val;
-                            u = src.lookupurl + safeVal;
-                        }
                         if(defangRep) u = defang(u);
                         allUrls.add(u);
-                     });
-                });
+                    });
+                }
+
                 if(allUrls.size > 0) {
                     sectionText += "\n\nReferences:\n";
                     sectionText += Array.from(allUrls).map(u => `- ${u}`).join('\n');
