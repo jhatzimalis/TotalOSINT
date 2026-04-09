@@ -1,78 +1,70 @@
 # 🕵️‍♂️ TotalOSINT
 
-**The All-in-One, Client-Side OSINT Investigation Tool.**
+**The All-in-One, Privacy-First OSINT Investigation Toolkit.**
 
-TotalOSINT is a privacy-first, client-side OSINT toolkit for security analysts. Instantly extract IOCs (IPs, Domains, Hashes) from raw logs and launch bulk investigations across dozens of threat intelligence sources. Zero-data-persistence workflow for SOC and DFIR teams. No installation required.
+TotalOSINT is a client-side OSINT workbench designed for SOC analysts, threat hunters, and DFIR teams. Instantly extract indicators of compromise (IOCs) from raw logs and launch bulk investigations across dozens of threat intelligence sources. 
+
+Built with OpSec in mind: **Zero data persistence. No backend APIs. Single-file deployment.**
 
 [![Live Demo](https://img.shields.io/badge/demo-Live%20on%20GitHub%20Pages-brightgreen?style=for-the-badge&logo=github)](https://jhatzimalis.github.io/TotalOSINT)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Security](https://img.shields.io/badge/Security-Client%20Side%20Only-green.svg)
-
-
-https://github.com/user-attachments/assets/36fe62e4-7047-4f83-8eb0-c3ec89e52ed2
-
+![Deployment](https://img.shields.io/badge/Deployment-Single%20HTML%20File-orange.svg)
 
 ## ✨ Features
 
-* **⚡ Smart Extraction:** Automatically detects and sorts IPv4/IPv6, Domains, URLs, and MD5/SHA Hashes from raw text.
+* **⚡ Smart Extraction:** Automatically parses raw text, notes, or logs to extract and deduplicate IPv4/IPv6, Domains, URLs, and MD5/SHA hashes.
 * **🛡️ OPSEC First:** Zero data persistence. Inputs and investigation notes are held in RAM only and wiped on page refresh. No data is sent to any backend server.
-* **🚀 Bulk Investigation:** Select multiple sources and open them all in new tabs with one click.
-* **📂 Case Management:** Triage entities (Safe, Suspicious, Malicious) and generate formatted text reports for your case files.
-* **🔖 Bookmarks:** A dedicated dashboard for quick access to your favorite tools.
-* **⚙️ Customizable:** Add your own custom internal or external sources directly via the settings.
+* **🚀 Bulk Investigation:** Select multiple sources (or trigger pre-configured Presets) and open them simultaneously in new tabs.
+* **🎯 Source Presets & Favorites:** Star your favorite tools (💙) and map sources to quick-select Presets (🟢, 🟡, 🔴) for tiered investigation workflows.
+* **📝 Advanced Reporting:** Triage entities (Clean, Suspicious, Malicious), add custom notes, and generate highly configurable, defanged text reports for your case files.
+* **💾 Portability:** Export your Custom Sources, Settings, Favorites, and Presets to JSON text for easy backup or sharing across air-gapped workstations.
+* **🌙 UI Customization:** Includes native Dark/Light modes and customizable layout pane sizing.
 
 ## 📊 Supported Indicators
 
 | Indicator | Support | Example |
 | :--- | :--- | :--- |
-| **IPv4 / IPv6** | ✅ | `1.1.1.1`, `2606:4700...` |
-| **Domains** | ✅ | `google.com` |
-| **URLs** | ✅ | `hxxps://malicious-site.com/path` |
-| **Hashes** | ✅ | MD5, SHA-1, SHA-256 |
+| **IPv4 / IPv6** | ✅ | `1[.]1[.]1[.]1`, `2606[:]4700...` |
+| **Domains** | ✅ | `example[.]com` |
+| **URLs** | ✅ | `hxxps[://]example[.]com/path` |
+| **Hashes** | ✅ | `MD5`, `SHA-1`, `SHA-256` |
 
 ## 🚀 Usage
 
-### Option 1: GitHub Pages
+### Option 1: Live Web App (GitHub Pages)
 Visit the live deployment via GitHub Pages. Link 🠊 [jhatzimalis.github.io/TotalOSINT](https://jhatzimalis.github.io/TotalOSINT)
 
-### Option 2: Local / Offline
-TotalOSINT is a static web application. You can run it entirely offline.
-1.  Download `index.html` and `sources.js`.
-2.  Open `index.html` in any modern web browser.
+### Option 2: Local / Air-Gapped (Recommended)
+TotalOSINT is a static, zero-dependency web application. It runs entirely offline.
+1. Download the latest `index.html` file.
+2. Open `index.html` in any modern web browser (Chrome, Firefox, Edge, Safari).
 
-## 🛠️ Configuration
+## 🛠️ Configuration & Customization
 
-### Adding Custom Sources
-You can add your own tools via the **Settings (⚙️)** menu. These are saved to your browser's local storage.
-* **ID:** A unique identifier (e.g., `MY_TOOL`).
-* **Lookup URL:** The URL used to search. Use the tool's search parameter format. TotalOSINT appends the entity to the end of this URL.
-    * *Example:* `hxxps://example.com/search?q=`
+TotalOSINT is designed to adapt to your specific workflow. Click the **Settings (⚙️)** icon in the top right to access backups and theme controls.
 
-### Advanced: `sources.js`
-If you are self-hosting, you can modify the `sources.js` file to permanently change the default toolset.
+### 1. Adding Custom Sources
+Click the **Edit Sources (✏️)** button in the Sources pane to enter Edit Mode. Click "Add Custom Source" to input your own internal or external tools.
+* **Name:** Display name (e.g., `Internal Splunk`).
+* **Home URL:** The base URL of the tool.
+* **Lookup URL (Optional):** The URL used to execute a search. TotalOSINT appends the extracted entity to the end of this URL. 
+  * *Example:* `hxxps[://]intel-db[.]local/search?q=`
 
-```javascript
-const sources = {
-    ip: [
-        { 
-            id: 'TOOL_ID', 
-            name: 'Tool Name', 
-            url: 'hxxps://example.com', 
-            lookupurl: 'hxxps://example.com/search/' // Optional
-        }
-    ],
-    domain: [ ... ],
-    hash: [ ... ],
-    bookmarks: [ ... ]
-};
-```
+### 2. Presets & Favorites
+While in **Edit Mode (✏️)**, you can configure your toolset:
+* Click the **Heart (💙)** to pin a tool to the top of your list.
+* Click the **Preset Dots** to map a tool to Preset 1 (Green), Preset 2 (Yellow), or Preset 3 (Red). 
+
+### 3. Hardcoding Sources (For Self-Hosted Deployments)
+If you are deploying TotalOSINT for a team and want to permanently embed default internal tools, simply open `index.html` in a text editor, locate the `const sources = { ... }` block, and add your endpoints directly to the JavaScript object.
 
 ## 🔒 Security & Privacy
 
-* **Client-Side Execution:** All logic runs locally in your browser context. Data extraction (RegEx) occurs entirely on the client side.
-* **No Tracking:** No analytics, no cookies, no external API calls.
-* **Data Safety:** Raw inputs are **not** stored in LocalStorage. If your browser crashes or the tab is closed, the data is unrecoverable (fail-safe design).
-* **Defanging:** Built-in "De-fang" toggle (`1[.]1[.]1[.]1`) prevents accidental clicks on malicious links in your reports.
+* **Client-Side Execution:** All logic runs locally in your browser context. Data extraction (RegEx) occurs entirely on your machine.
+* **No Tracking:** No analytics, no cookies, no external fonts, and no API calls.
+* **Fail-Safe Design:** Raw inputs are **not** stored in LocalStorage. If your browser crashes or the tab is closed, the data is permanently wiped from memory.
+* **Global Defanging:** A built-in "Defang" toggle automatically neuters indicators (`1[.]1[.]1[.]1`, `hxxp[://]`) in the UI, clipboard copies, and generated reports to prevent accidental clicks.
 
 ## 🏷️ Tags
 
