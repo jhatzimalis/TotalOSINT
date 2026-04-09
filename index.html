@@ -30,7 +30,11 @@
     <style>
         /* --- CSS Variables & Themes --- */
         :root {
-            --bg-body: #0f172a; --bg-panel: #1e293b; --bg-header: #020617;
+            --bg-header: #020617; /* Navbar */
+            --bg-panel: #1e293b;  /* Header & Footer */
+            --bg-subheader: #162032; /* Subtoolbar Middle */
+            --bg-body: #0f172a;   /* Panel Content */
+            
             --text-main: #f1f5f9; --text-muted: #94a3b8; --text-light: #ecf0f1;
             --accent: #3b82f6; --accent-hover: #60a5fa; 
             --border: #334155; 
@@ -38,17 +42,22 @@
             --radius: 6px;
             --hl-active: rgba(59, 130, 246, 0.5); 
             --bg-hover: rgba(255,255,255,0.1);
-            --toast-y: 85px; 
+            --bg-triage: rgba(0,0,0,0.15);
             --focus-ring: 0 0 0 2px var(--bg-body), 0 0 0 4px var(--accent);
         }
 
         body.theme-light {
-            --bg-body: #f4f6f8; --bg-panel: #ffffff; --bg-header: #202b36;
+            --bg-header: #202b36;
+            --bg-panel: #ffffff;
+            --bg-subheader: #f9fafb;
+            --bg-body: #f4f6f8;
+            
             --text-main: #2c3e50; --text-muted: #64748b;
             --accent: #2563eb; --accent-hover: #1d4ed8; 
             --border: #dce1e6; 
             --hl-active: rgba(37, 99, 235, 0.25);
             --bg-hover: rgba(0,0,0,0.05);
+            --bg-triage: #f8fafc;
         }
 
         /* --- Global Reset & Scrollbars --- */
@@ -56,7 +65,7 @@
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; 
             background: var(--bg-body); color: var(--text-main); margin: 0; 
-            display: flex; flex-direction: column; height: 100vh; overflow: hidden; 
+            display: flex; flex-direction: column; height: 100dvh; overflow: hidden; 
         }
         
         * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
@@ -68,10 +77,18 @@
 
         /* --- Accessibility Focus Styles --- */
         :focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 2px; }
-        .input-textarea:focus-visible { box-shadow: none; border-color: var(--accent); }
+        textarea, input, select { outline: none !important; }
+        textarea:focus, input:focus, select:focus { outline: none !important; border-color: var(--accent) !important; box-shadow: 0 0 0 1px var(--accent) !important; }
+        
+        label:focus-visible, input[type="checkbox"]:focus-visible, .toggle-switch input:focus-visible + .toggle-slider, .toggle-switch input:focus + .toggle-slider { box-shadow: none !important; outline: none !important; }
+        textarea#raw-input:focus, textarea#raw-input:focus-visible { outline: none !important; box-shadow: none !important; border-color: transparent !important; }
+
+        input[type="checkbox"], select, label { cursor: pointer; }
+        input[type="checkbox"]:disabled, select:disabled { cursor: default !important; }
+        label.disabled-label, label.disabled-label * { cursor: default !important; }
 
         /* --- Buttons & Inputs --- */
-        .icon-btn { background: none; border: 1px solid transparent; color: inherit; font-size: 1.1rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; }
+        .icon-btn { background: none; border: 1px solid transparent; color: inherit; font-size: 1.1rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; }
         .icon-btn:hover { background: var(--bg-hover); }
         .icon-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
@@ -97,41 +114,32 @@
             width: 100%; background: var(--bg-panel); border: 1px solid var(--border); 
             color: var(--text-main); padding: 5px 8px; border-radius: 4px; font-size: 0.85rem; font-family: inherit;
         }
-        .form-input:focus { border-color: var(--accent); outline: none; }
-        .form-select:disabled { opacity: 0.5; cursor: not-allowed; }
+        .form-select:disabled { opacity: 0.5; cursor: default !important; text-decoration: line-through; }
 
         /* --- Header --- */
-        header { background: var(--bg-header); color: var(--text-light); height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); flex-shrink: 0; z-index:20; }
-        .branding { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
-        .logo-text { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
+        header { background: var(--bg-header); color: var(--text-light); height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); flex-shrink: 0; z-index:20; }
+        .branding { display: flex; align-items: center; cursor: pointer; user-select: none; }
+        .logo-text { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; white-space: nowrap; margin-left: 4px; }
 
         /* --- Main Layout --- */
         main { flex: 1; display: flex; overflow: hidden; position: relative; }
 
-        /* 1. Left Pane: Input */
-        .pane-left { 
-            width: 300px; min-width: 200px; max-width: 40%;
-            background: var(--bg-panel); border-right: 1px solid var(--border); 
-            display: flex; flex-direction: column; z-index: 10; flex-shrink: 0;
-            resize: horizontal; overflow: auto; scrollbar-width: none; position: relative;
-        }
-        .pane-left::-webkit-scrollbar { width: 0; height: 0; }
-        .pane-left::after {
-            content: ""; position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px;
-            background-image: linear-gradient(135deg, transparent 50%, var(--border) 50%);
-            background-size: 100% 100%; pointer-events: none; z-index: 50;
-        }
-        .pane-left::-webkit-resizer { display: block; }
+        .pane-left { background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; flex-shrink: 0; transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; position: relative; }
         
-        .pane-header { padding: 0 12px; height: 42px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; background: var(--bg-panel); flex-shrink: 0; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        .pane-header-container { padding: 0; height: auto; flex-direction: column; border-bottom: none; background: var(--bg-panel); flex-shrink: 0; }
+        .pane-header-title { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 36px; padding: 0 12px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; box-sizing: border-box; }
+        
+        .pane-sub-toolbar { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 26px; padding: 0 10px; background: var(--bg-subheader); border-bottom: 1px solid var(--border); box-sizing: border-box; }
+        
+        .pane-left.size-1 { width: 220px; }
+        .pane-left.size-2 { width: 340px; }
+        .pane-left.size-3 { width: 480px; }
+        .pane-right.size-1 { width: 240px; }
+        .pane-right.size-2 { width: 340px; }
+        .pane-right.size-3 { width: 480px; }
         
         .input-container { position: relative; flex: 1; width: 100%; overflow: hidden; background: var(--bg-body); }
-        .input-backdrop, .input-textarea {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            width: 100%; height: 100%; margin: 0; padding: 15px 5px 15px 15px; border: none;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.5;
-            white-space: pre-wrap; word-wrap: break-word; background: transparent; overflow-y: scroll; 
-        }
+        .input-backdrop, .input-textarea { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; margin: 0; padding: 15px 5px 15px 15px; border: none; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; background: transparent; overflow-y: scroll; }
         .input-backdrop { z-index: 1; color: transparent; pointer-events: none; }
         .input-textarea { z-index: 2; color: var(--text-main); resize: none; outline: none; }
         
@@ -140,33 +148,13 @@
         mark.type-domain { background: var(--hl-active); }
         mark.type-hash { background: var(--hl-active); }
 
-        /* 2. Center Pane: Workbench (Stack) */
-        .pane-center {
-            flex: 1; display: flex; flex-direction: column; min-width: 0; 
-            background: var(--bg-body); overflow: hidden; z-index: 5;
-        }
-        /* Consistent flush padding */
-        .stack-list { 
-            flex: 1; overflow-y: auto; padding: 10px; gap: 10px; display: flex; flex-direction: column;
-        }
+        .pane-center { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-body); overflow: hidden; z-index: 5; }
+        .stack-list { flex: 1; overflow-y: auto; padding: 10px; gap: 10px; display: flex; flex-direction: column; }
 
-        .stack-card { 
-            background: var(--bg-panel); 
-            border: 1px solid var(--border); 
-            border-radius: var(--radius); display: flex; flex-direction: column; 
-            transition: border-color 0.2s, box-shadow 0.2s; overflow: hidden; flex-shrink: 0;
-            cursor: pointer;
-        }
+        .stack-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; transition: border-color 0.2s, box-shadow 0.2s; overflow: hidden; flex-shrink: 0; cursor: pointer; }
         .stack-card.focused { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-        
-        .stack-header { 
-            padding: 10px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border); user-select: none; background: rgba(0,0,0,0.02);
-            transition: background 0.2s;
-        }
-        /* Fix empty card border thickness */
+        .stack-header { padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); user-select: none; background: rgba(0,0,0,0.02); transition: background 0.2s; }
         .stack-card.empty .stack-header { border-bottom: none; }
-        
         .stack-card.focused .stack-header { background: var(--bg-body); }
         .stack-title { font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
         .stack-count { font-size: 0.9rem; background: var(--border); padding: 1px 8px; border-radius: 10px; font-weight: 600; min-width: 24px; text-align: center; }
@@ -174,7 +162,6 @@
 
         .stack-body { display: flex; flex-direction: column; }
         
-        /* Workbench Entities */
         .ent-row { border-bottom: 1px solid var(--border); display: flex; flex-direction: column; cursor: pointer; user-select: none; }
         .ent-row:hover { background: rgba(255,255,255,0.02); }
         .ent-row:last-child { border-bottom: none; }
@@ -182,10 +169,7 @@
         .ent-row.disabled { opacity: 0.6; }
         .ent-row.disabled .ent-val { text-decoration: line-through; pointer-events: none; }
         
-        .ent-header {
-            padding: 6px 12px; display: flex; align-items: center;
-            min-height: 36px; background: transparent; gap: 10px; justify-content: flex-start;
-        }
+        .ent-header { padding: 6px 12px; display: flex; align-items: center; min-height: 36px; background: transparent; gap: 10px; justify-content: flex-start; }
         
         .ent-left { display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 0 1 auto; }
         .ent-val { font-family: 'Consolas', monospace; font-size: 0.85rem; color: var(--text-main); word-break: break-all; transition: color 0.1s; padding: 2px 0; cursor: pointer; }
@@ -195,63 +179,73 @@
         
         .ent-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
         
-        .toggle-circle { width: 14px; height: 14px; border: 1px solid var(--text-muted); border-radius: 50%; cursor: pointer; flex-shrink: 0; position: relative; }
+        .toggle-circle { width: 14px; height: 14px; border: 1px solid var(--text-muted); border-radius: 50%; cursor: pointer; flex-shrink: 0; position: relative; transition: border-color 0.2s; background: transparent; }
         .toggle-circle:hover { border-color: var(--accent); }
         .toggle-circle::after { content: ""; position:absolute; top:2px; left:2px; right:2px; bottom:2px; border-radius:50%; background:transparent; transition: background 0.2s; }
-        .ent-row:not(.disabled) .toggle-circle::after { background: var(--success); }
-        .ent-row:not(.disabled) .toggle-circle { border-color: var(--border); }
         
-        .ent-arrow { 
-            border: solid var(--text-muted); border-width: 0 2px 2px 0; display: inline-block; padding: 3px; 
-            transform: rotate(45deg); transition: transform 0.2s; margin-bottom: 2px; pointer-events: none;
-        }
+        .toggle-circle.on, .ent-row:not(.disabled) .toggle-circle { border-color: rgba(148, 163, 184, 0.4); }
+        .toggle-circle.on::after, .ent-row:not(.disabled) .toggle-circle::after { background: var(--accent); }
+        
+        .ent-arrow { border: solid var(--text-muted); border-width: 0 2px 2px 0; display: inline-block; padding: 3px; transform: rotate(45deg); transition: transform 0.2s; margin-bottom: 2px; pointer-events: none; }
         .ent-row.expanded .ent-arrow { transform: rotate(-135deg); margin-bottom: -2px; border-color: var(--accent); }
 
-        .ent-triage-body { 
-            display: none; padding: 10px 12px; background: rgba(0,0,0,0.15); 
-            border-top: 1px dashed var(--border); gap: 10px; flex-wrap: wrap; align-items: center; cursor: default;
-        }
+        .ent-triage-body { display: none; padding: 10px 12px; background: var(--bg-triage); border-top: 1px dashed var(--border); gap: 10px; flex-wrap: wrap; align-items: center; cursor: default; }
         .ent-row.expanded .ent-triage-body { display: flex; }
         .ent-row.expanded .ent-header { background: rgba(59, 130, 246, 0.05); }
 
-        /* 3. Right Pane: Sources & Context */
-        .pane-right {
-            width: 250px; background: var(--bg-panel); border-left: 1px solid var(--border);
-            display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.3s; z-index: 10;
-        }
-        /* Consistent flush padding */
-        .sources-grid { padding: 10px; display: grid; grid-template-columns: 1fr; gap: 8px; overflow-y: auto; flex: 1; align-content: flex-start; background: var(--bg-body); }
+        .pane-right { background: var(--bg-panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10; }
         
-        .source-btn {
-            display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--border); height: 34px;
-            border-radius: var(--radius); cursor: pointer; background: var(--bg-panel); 
-            font-size: 0.8rem; font-weight: 500; transition: all 0.1s;
-            position: relative; overflow: hidden;
-        }
+        .sources-grid { padding: 10px; display: grid; gap: 8px; overflow-y: auto; flex: 1; align-content: flex-start; background: var(--bg-body); }
+        .sources-grid.cols-1 { grid-template-columns: 1fr; }
+        .sources-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .sources-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        
+        .source-btn { display: flex; align-items: stretch; padding: 0 0 0 10px; border: 1px solid var(--border); height: 34px; border-radius: var(--radius); cursor: pointer; background: var(--bg-panel); font-size: 0.8rem; font-weight: 500; transition: all 0.1s; position: relative; overflow: hidden; }
         .source-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
         .source-btn.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); box-shadow: inset 3px 0 0 var(--accent); }
         .source-btn.edit-mode { border-style: dashed; }
 
-        .src-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-        /* Fixed width for icons container to prevent shifting */
-        .src-icons { display: flex; gap: 4px; margin-left: 5px; opacity: 0.8; font-size: 0.75rem; align-items: center; flex-shrink: 0; min-width: 45px; justify-content: flex-end; }
+        .src-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 1px; line-height: 32px; display: block; }
+        .src-icons { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; width: 14px; flex-shrink: 0; margin-right: 0px; padding-bottom: 3px; }
         
-        .src-fav-icon { color: #3b82f6; transition: opacity 0.2s; cursor: pointer; padding: 2px; border-radius: 4px; }
-        .src-fav-icon:hover { background: var(--bg-hover); opacity: 1 !important; }
+        .src-lookup-icon { font-size: 0.65rem; line-height: 1; display: flex; align-items: center; justify-content: center; }
+        .src-fav-icon { font-size: 0.75rem; color: #3b82f6; transition: all 0.2s; line-height: 1; display: flex; align-items: center; justify-content: center; }
         .src-fav-icon.faded { opacity: 0.2; }
         .src-fav-icon.faded:hover { opacity: 1 !important; }
+        
+        .src-edit-btn { width: 24px; font-size: 0.8rem; background: rgba(0,0,0,0.02); border: none; border-left: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; color: inherit; padding: 0; flex-shrink: 0; }
 
         .add-src-panel { display:none; flex-direction: column; padding:15px; background:var(--bg-body); border-top:1px solid var(--border); gap:10px; }
         .add-src-trigger { padding: 10px; border-top: 1px solid var(--border); background: var(--bg-panel); text-align: center; display: none; }
         
+        /* Presets UI */
+        .preset-filter-btn { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: transform 0.1s; outline:none !important; }
+        .preset-filter-btn:hover { transform: scale(1.2); }
+        .preset-filter-btn:active { transform: scale(0.9); }
+        
+        .src-preset-strip { width: 8px; display: flex; flex-direction: column; flex-shrink: 0; background: transparent; border-left: 1px solid transparent; }
+        .src-preset-strip.edit-mode { background: rgba(125,125,125,0.05); border-left-color: var(--border); }
+        .src-preset-strip:not(.is-visible) { visibility: hidden; } 
+        
+        .src-preset-dot { flex: 1; opacity: 1; border-bottom: none; transition: 0.1s; background: transparent; height: 100%; border-bottom-color: transparent; }
+        .src-preset-strip.edit-mode .src-preset-dot { border-bottom: 1px solid var(--border); }
+        .src-preset-dot:last-child { border-bottom: none !important; }
+        
+        /* Eliminate border conflicts for adjacent active dots */
+        .src-preset-strip.edit-mode .src-preset-dot.active { border-bottom-color: transparent; }
+        .src-preset-strip.edit-mode .src-preset-dot:has(+ .active) { border-bottom-color: transparent; }
+
+        .src-preset-strip:not(.edit-mode) .src-preset-dot:not(.active) { display: none; }
+        
+        .src-preset-dot.p1.active, .src-preset-strip.edit-mode .src-preset-dot.p1:hover { background: var(--success); }
+        .src-preset-dot.p2.active, .src-preset-strip.edit-mode .src-preset-dot.p2:hover { background: var(--warning); }
+        .src-preset-dot.p3.active, .src-preset-strip.edit-mode .src-preset-dot.p3:hover { background: var(--danger); }
+
         /* Bottom Toolbar */
-        .toolbar { 
-            height: 48px; border-top: 1px solid var(--border); background: var(--bg-panel); 
-            display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 20; gap: 10px; flex-shrink: 0; 
-        }
-        .toolbar-stats { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 10px; align-items: center; white-space: nowrap; flex: 0 1 auto; overflow: hidden; }
-        .stat-val { color: var(--text-main); font-weight: 700; margin-left: 4px; }
-        .toolbar-actions { display: flex; gap: 10px; align-items: center; }
+        .toolbar { height: 44px; border-top: 1px solid var(--border); background: var(--bg-panel); display: flex; align-items: center; justify-content: center; padding: 0 15px; z-index: 20; flex-shrink: 0; gap: 15px; }
+        .toolbar-stats { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; justify-content: center; min-width: 80px; text-align: right; }
+        .stat-container { display: flex; align-items: center; justify-content: space-between; width: 100%; font-size: 0.75rem; gap: 10px; color: var(--text-muted); }
+        .stat-val { color: var(--text-main); font-weight: 700; margin-left: auto; }
         
         /* Modals & Toggles */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
@@ -266,13 +260,17 @@
         .toggle-slider:before { position: absolute; content: ""; height: 10px; width: 10px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
         input:checked + .toggle-slider { background-color: var(--accent); }
         input:checked + .toggle-slider:before { transform: translateX(14px); }
+        input:disabled + .toggle-slider { opacity: 0.5; cursor: default !important; }
         
         input[type="checkbox"] { accent-color: var(--accent); }
 
-        .toast { position: fixed; bottom: var(--toast-y); right: 25px; background: #333; color: white; padding: 12px 20px; border-radius: 6px; z-index: 2000; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-        .toast.visible { opacity: 1; transform: translateY(0); }
+        /* Toast Container */
+        .toast-container { position: fixed; bottom: 25px; right: 25px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; pointer-events: none; }
+        .toast { background: #333; color: white; padding: 12px 20px; border-radius: 6px; opacity: 0; transform: translateX(20px); transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-weight: 500; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); pointer-events: auto; }
+        .toast.visible { opacity: 1; transform: translateX(0); }
         .toast.success { background: var(--success); }
         .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); color: #111; }
 
         .backup-textarea { width: 100%; height: 50px; min-height: 50px; max-height: 200px; background: var(--bg-body); color: var(--accent); border: 1px solid var(--border); font-family: monospace; padding: 8px; font-size: 0.75rem; resize: vertical; margin-bottom: 10px; }
         
@@ -281,12 +279,13 @@
         .control-group { display: flex; flex-direction: column; gap: 5px; }
         .control-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
         
-        /* Grid Alignment for Options - Fixed 2 columns */
-        .options-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; /* Strict 2 columns to align left/right sides */
-            gap: 5px 15px; /* vertical-gap horizontal-gap */
-        }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 15px; }
+        
+        .format-toggle-container { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; height: auto; }
+        .fmt-btn { border: none; border-bottom: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s; outline: none !important; height: 28px; }
+        .fmt-btn:last-child { border-bottom: none; }
+        .fmt-btn.active { background: var(--accent); color: white; }
+        .fmt-btn:disabled { opacity: 0.5; cursor: default !important; text-decoration: line-through; }
 
         .flex-gap { display: flex; align-items: center; gap: 10px; }
         .flex-gap .form-select { width: auto; flex: initial; }
@@ -296,29 +295,22 @@
         
         @media (max-width: 900px) {
             main { flex-direction: column; }
-            .pane-left { 
-                width: 100% !important; max-width: 100%; 
-                min-height: 100px; height: 120px; max-height: 50%; /* Adjusted height */
-                resize: vertical; border-right: none; border-bottom: 1px solid var(--border); 
-            }
-            .pane-left::after { display: block; cursor: ns-resize; }
-            
-            /* Center pane fills remaining space, allows internal scroll */
+            .pane-left { width: 100% !important; max-width: 100%; min-height: 80px; border-right: none; border-bottom: 1px solid var(--border); transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
             .pane-center { flex: 1; height: auto; min-height: 0; overflow: hidden; z-index: 5; }
             .stack-list { overflow-y: auto; height: 100%; }
+            .pane-right { width: 100% !important; border-left: none; border-top: 1px solid var(--border); overflow: hidden; z-index: 10; flex-shrink: 0; transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
             
-            /* Increased height for mobile sources list */
-            .pane-right { width: 100%; border-left: none; border-top: 1px solid var(--border); height: 260px; overflow: hidden; z-index: 10; flex-shrink: 0;}
-            
-            /* Compact toolbar for mobile */
-            .toolbar { padding: 5px 10px; height: auto; flex-wrap: wrap; min-height: 48px; }
-            .toolbar-stats { margin-right: auto; }
+            .pane-left.size-1 { height: 100px; }
+            .pane-left.size-2 { height: 160px; }
+            .pane-left.size-3 { height: 250px; }
+            .pane-right.size-1 { height: 150px; }
+            .pane-right.size-2 { height: 220px; }
+            .pane-right.size-3 { height: 300px; }
+            .sources-grid.cols-1, .sources-grid.cols-2, .sources-grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
+            .toolbar { gap: 10px; padding: 0 10px; flex-direction: row; align-items: center; justify-content: center; }
         }
         
-        .theme-card {
-            border: 2px solid var(--border); padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; opacity: 0.7; transition: all 0.2s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-        }
+        .theme-card { border: 2px solid var(--border); padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; opacity: 0.7; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
         .theme-card.active { opacity: 1; border-color: var(--accent); }
         .theme-emoji { font-size: 1.5rem; }
     </style>
@@ -329,9 +321,15 @@
 <header>
     <div class="branding" onclick="hardReset()" tabindex="0" role="button" onkeydown="handleEnter(event, this)">
         <span style="font-size: 1.5rem;">🕵️‍♂️</span>
-        <div class="logo-text" style="margin-left:8px;">TotalOSINT</div>
+        <div class="logo-text">TotalOSINT</div>
     </div>
-    <div style="display:flex; gap:10px;">
+    <div style="display:flex; gap:12px; align-items:center;">
+        <a href="https://github.com/jhatzimalis/TotalOSINT" class="icon-btn" target="_blank" rel="noopener noreferrer" style="opacity:0.8; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="GitHub Repo">
+            <svg height="20" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="20" fill="currentColor">
+                <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+            </svg>
+        </a>
+        <div style="width: 1px; height: 18px; background: var(--text-muted); opacity: 0.5;"></div>
         <button class="icon-btn" onclick="openSettings()" title="Settings">⚙️</button>
     </div>
 </header>
@@ -339,12 +337,17 @@
 <!-- Main Interface -->
 <main>
     <!-- Left Pane: Input -->
-    <div class="pane-left" id="pane-left">
-        <div class="pane-header">
-            <span>Raw Data</span>
-            <div style="display:flex; gap:5px;">
-                <button class="icon-btn" onclick="copyInput()" title="Copy">📋</button>
-                <button class="icon-btn" onclick="hardReset()" title="Clear">🗑️</button>
+    <div class="pane-left size-2" id="pane-left">
+        <div class="pane-header-container">
+            <div class="pane-header-title">
+                <span>Raw Data</span>
+                <button class="icon-btn" onclick="hardReset()" title="Clear All">🗑️</button>
+            </div>
+            <div class="pane-sub-toolbar" style="justify-content: space-between;">
+                <button class="icon-btn" style="width:24px; height:24px; font-size:0.8rem;" onclick="cycleRawLayout()" title="Toggle Layout">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18"/><rect x="14" y="3" width="7" height="18"/></svg>
+                </button>
+                <button class="icon-btn" style="width:24px; height:24px; font-size:0.8rem;" onclick="copyInput()" title="Copy">📋</button>
             </div>
         </div>
         <div class="input-container">
@@ -355,38 +358,61 @@
 
     <!-- Center Pane: Workbench -->
     <div class="pane-center" id="stack-container">
-        <div class="pane-header">
-            <span>Workbench</span>
-            <button class="btn-fancy btn-sm" onclick="setFocus('bookmarks')">
-                <div class="btn-fancy-icon">🔖</div>
-                <div class="btn-fancy-text">Bookmarks</div>
-            </button>
+        <div class="pane-header-container">
+            <div class="pane-header-title">
+                <span>Workbench</span>
+                <button class="btn-fancy btn-sm" onclick="setFocus('bookmarks')">
+                    <div class="btn-fancy-icon" style="color:var(--text-main);">🔖</div>
+                    <div class="btn-fancy-text" style="color:var(--text-muted);">Bookmarks</div>
+                </button>
+            </div>
+            <div class="pane-sub-toolbar" style="justify-content: flex-end;">
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer;" title="Global Defang">
+                    <span style="font-size:0.7rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Defang</span>
+                    <div class="toggle-switch" style="transform: scale(0.75); width:30px; margin:0; transform-origin: right center;">
+                        <input type="checkbox" id="wb-defang" onchange="toggleGlobalDefang(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </div>
+                </label>
+            </div>
         </div>
         <div class="stack-list" id="stack-list"></div>
     </div>
 
     <!-- Right Pane: Sources -->
-    <div class="pane-right" id="pane-right">
-        <div class="pane-header">
-            <span id="ctx-header-title">Sources</span>
-            <div style="display:flex; gap:2px;">
+    <div class="pane-right size-2" id="pane-right">
+        <div class="pane-header-container">
+            <div class="pane-header-title">
+                <span id="ctx-header-title">Sources (*)</span>
                 <button class="icon-btn" id="ctx-edit-toggle" title="Edit Sources" onclick="toggleSourceEditMode()">✏️</button>
-                <button class="icon-btn" onclick="toggleSort()" title="Sort A-Z">🔤</button>
-                <button class="icon-btn" onclick="toggleSelectAll()" title="Toggle All">☑️</button>
+            </div>
+            <div class="pane-sub-toolbar">
+                <div style="display:flex; gap:8px;" id="src-presets-filters">
+                    <button class="preset-filter-btn" style="background:var(--success);" title="Select Preset 1" onclick="selectPreset(1)"></button>
+                    <button class="preset-filter-btn" style="background:var(--warning);" title="Select Preset 2" onclick="selectPreset(2)"></button>
+                    <button class="preset-filter-btn" style="background:var(--danger);" title="Select Preset 3" onclick="selectPreset(3)"></button>
+                </div>
+                <div style="display:flex; gap:2px;">
+                    <button class="icon-btn" style="width:24px; height:24px; font-size:0.8rem;" onclick="toggleSort()" title="Sort A-Z">🔤</button>
+                    <button class="icon-btn" style="width:24px; height:24px; font-size:0.8rem;" onclick="toggleSelectAll()" title="Toggle All">☑️</button>
+                    <button class="icon-btn" style="width:24px; height:24px; font-size:0.8rem;" onclick="cycleSourceLayout()" title="Toggle Layout">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18"/><rect x="14" y="3" width="7" height="18"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
         
-        <div class="sources-grid" id="ctx-grid"></div>
+        <div class="sources-grid cols-2" id="ctx-grid"></div>
         
         <div class="add-src-trigger" id="add-src-trigger">
-            <button class="btn-fancy" style="width:100%; justify-content:center;" onclick="openAddSource()">
+            <button class="btn-fancy btn-primary" style="width:100%; justify-content:center;" onclick="openAddSource()">
                 <div class="btn-fancy-icon">➕</div>
-                <div class="btn-fancy-text">Add Source</div>
+                <div class="btn-fancy-text">Add Custom Source</div>
             </button>
         </div>
 
         <div id="add-source-panel" class="add-src-panel">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:5px; margin-bottom:5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:2px; margin-bottom:2px;">
                 <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Edit / Add Source</div>
                 <button class="icon-btn hidden" id="src-delete-btn" style="color:var(--danger);" onclick="deleteSource()">🗑️</button>
             </div>
@@ -394,7 +420,7 @@
             <input class="form-input" id="src-url" placeholder="Home URL">
             <input class="form-input" id="src-lookup" placeholder="Lookup URL (Optional)">
             <input type="hidden" id="src-edit-id">
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px; margin-top:5px;">
                 <button class="btn-fancy btn-primary" onclick="saveSource()" style="flex:1; justify-content:center;">
                     <div class="btn-fancy-text">Save</div>
                 </button>
@@ -408,22 +434,20 @@
 
 <div class="toolbar">
     <div class="toolbar-stats">
-        <span>Entities: <span id="stat-ent" class="stat-val">0</span></span>
-        <span style="opacity:0.3">|</span>
-        <span>Selected: <span id="stat-sel" class="stat-val">0</span></span>
+        <div class="stat-container"><span>Entities:</span> <span id="stat-ent" class="stat-val">0</span></div>
+        <div style="height:1px; background:var(--border); width:100%; margin:1px 0;"></div>
+        <div class="stat-container"><span>Selected:</span> <span id="stat-sel" class="stat-val">0</span></div>
     </div>
     
-    <div class="toolbar-actions">
-        <button class="btn-fancy" onclick="openReportModal()">
-            <div class="btn-fancy-icon">📜</div>
-            <div class="btn-fancy-text">Report</div>
-        </button>
-        
-        <button class="btn-fancy btn-primary" onclick="executeInvestigation()">
-            <div class="btn-fancy-icon">🚀</div>
-            <div class="btn-fancy-text">Open</div>
-        </button>
-    </div>
+    <button class="btn-fancy" onclick="openReportModal()">
+        <div class="btn-fancy-icon">📜</div>
+        <div class="btn-fancy-text">Report</div>
+    </button>
+    
+    <button class="btn-fancy btn-primary" onclick="executeInvestigation()">
+        <div class="btn-fancy-icon">🚀</div>
+        <div class="btn-fancy-text">Open</div>
+    </button>
 </div>
 
 <!-- Report Modal -->
@@ -437,45 +461,41 @@
             <div class="report-controls">
                 <div class="control-group">
                     <div class="control-label">Include</div>
-                    <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-inc-ip" checked> IP Address</label>
-                    <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-inc-domain" checked> Domain / URL</label>
-                    <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-inc-hash" checked> Hash</label>
+                    <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-ip"><input type="checkbox" id="rep-inc-ip"> IP Address</label>
+                    <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-domain"><input type="checkbox" id="rep-inc-domain"> Domain / URL</label>
+                    <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-hash"><input type="checkbox" id="rep-inc-hash"> Hash</label>
                 </div>
                 
                 <div class="control-group">
                     <div class="control-label">Format</div>
-                    <select class="form-select" id="rep-mode" onchange="generateReport()">
-                        <option value="full">Full Report</option>
-                        <option value="simple">Simple List</option>
-                    </select>
+                    <div class="format-toggle-container">
+                        <button id="fmt-full-btn" class="fmt-btn active" onclick="setRepFormat('full')">Full</button>
+                        <button id="fmt-simple-btn" class="fmt-btn" onclick="setRepFormat('simple')">Simple</button>
+                    </div>
+                    <input type="hidden" id="rep-mode" value="full">
                 </div>
 
                 <div class="control-group">
                     <div class="control-label">Options</div>
                     <div class="options-grid">
-                        <!-- Defang (Always Visible) -->
-                        <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-defang" checked> Defang</label>
+                        <label class="flex-gap" style="font-size:0.85rem;" id="lbl-rep-defang"><input type="checkbox" id="rep-defang" checked> Defang</label>
                         
-                        <!-- Full Report Options -->
                         <div id="rep-opts-full" style="display:contents">
-                            <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-refs" checked> References</label>
-                            <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-verdict" checked> Verdicts</label>
-                            <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-space"> Space</label>
+                            <label class="flex-gap" style="font-size:0.85rem;" id="lbl-rep-refs"><input type="checkbox" id="rep-refs" checked> Refs</label>
+                            <label class="flex-gap" style="font-size:0.85rem;" id="lbl-rep-verdict"><input type="checkbox" id="rep-verdict" checked> Verdicts</label>
+                            <label class="flex-gap" style="font-size:0.85rem;" id="lbl-rep-space"><input type="checkbox" id="rep-space"> Space</label>
                         </div>
                         
-                        <!-- Simple List Options -->
-                        <div id="rep-opts-simple" style="display:contents">
-                            <label class="flex-gap" style="font-size:0.85rem;"><input type="checkbox" id="rep-simple-refs"> References</label>
+                        <div id="rep-opts-simple" style="display:contents" class="hidden">
+                            <label class="flex-gap" style="font-size:0.85rem;" id="lbl-rep-simple-refs"><input type="checkbox" id="rep-simple-refs"> Refs</label>
                         </div>
                     </div>
                 </div>
 
-                <!-- Shared Styling Row (Full Width) -->
                 <div class="control-group" style="grid-column: 1 / -1; margin-top:5px;">
                     <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:center;">
                         
-                        <!-- Quotes Dropdown (Shared - Now First) -->
-                        <div class="flex-gap" style="font-size:0.85rem;">
+                        <div class="flex-gap" style="font-size:0.85rem;" id="lbl-rep-quote">
                             <span style="font-weight:600; color:var(--text-muted);">Quotes:</span>
                             <select class="form-select" id="rep-quote">
                                 <option value="">None</option>
@@ -484,7 +504,6 @@
                             </select>
                         </div>
 
-                        <!-- Separator Dropdowns (Full Mode Only) -->
                         <div id="rep-style-sep" class="flex-gap" style="font-size:0.85rem;">
                             <span style="font-weight:600; color:var(--text-muted);">Sep:</span>
                             <select class="form-select" id="rep-sep-type" onchange="toggleSepCount()">
@@ -504,7 +523,6 @@
                             </select>
                         </div>
 
-                        <!-- List Style Dropdown (Simple Mode Only) -->
                         <div id="rep-style-list" class="flex-gap hidden" style="font-size:0.85rem;">
                             <span style="font-weight:600; color:var(--text-muted);">List:</span>
                             <select class="form-select" id="rep-list-style">
@@ -538,7 +556,7 @@
         </div>
         <div class="modal-body" style="display:flex; flex-direction:column; gap:20px;">
             <div>
-                <label style="font-weight:600; display:block; margin-bottom:5px;">Application Theme</label>
+                <label style="font-weight:600; display:block; margin-bottom:5px; cursor:default;">Theme</label>
                 <div style="display:flex; gap:15px;">
                     <div class="theme-card" id="theme-card-dark" style="flex:1;" onclick="setTheme('dark')" tabindex="0" role="button" onkeydown="handleEnter(event, this)">
                         <span class="theme-emoji">🌙</span>
@@ -554,11 +572,11 @@
             <div style="height:1px; background:var(--border); width:100%;"></div>
 
             <div>
-                <label style="font-weight:600; display:block; margin-bottom:5px;">Security</label>
+                <label style="font-weight:600; display:block; margin-bottom:5px; cursor:default;">Security</label>
                 <div style="display:flex; align-items:center; gap:10px; background:var(--bg-body); padding:10px; border-radius:4px; border:1px solid var(--border);">
-                    <label class="toggle-switch"><input type="checkbox" id="set-defang"><span class="toggle-slider"></span></label>
+                    <label class="toggle-switch"><input type="checkbox" id="set-defang" onchange="toggleGlobalDefang(this.checked)"><span class="toggle-slider"></span></label>
                     <div>
-                        <div style="font-weight:600; font-size:0.9rem;">Global Defang</div>
+                        <div style="font-weight:600; font-size:0.9rem;">Defang</div>
                         <div class="text-muted" style="font-size:0.8rem;">Automatically defang indicators (e.g. 1[.]1[.]1[.]1 or hxxp[://]) in the UI, Copy, and Reports.</div>
                     </div>
                 </div>
@@ -567,8 +585,8 @@
             <div style="height:1px; background:var(--border); width:100%;"></div>
 
             <div>
-                <label style="font-weight:600; display:block; margin-bottom:5px;">Data Backup / Restore</label>
-                <p class="text-muted" style="font-size:0.8rem; margin:0 0 10px 0;">Export your Custom Sources and Favorites to JSON text.</p>
+                <label style="font-weight:600; display:block; margin-bottom:5px; cursor:default;">Data Backup / Restore</label>
+                <p class="text-muted" style="font-size:0.8rem; margin:0 0 10px 0;">Export your Custom Sources, Favorites, Presets, and Settings to JSON text.</p>
                 <textarea id="backup-area" class="backup-textarea" placeholder="Paste JSON here to restore..."></textarea>
                 <div style="display:flex; gap:10px;">
                     <button class="btn-fancy" onclick="generateBackup()">
@@ -585,12 +603,40 @@
     </div>
 </div>
 
-<div class="toast" id="toast-el"></div>
+<!-- Warning Modal -->
+<div class="modal-overlay" id="warning-modal" style="z-index:3000;">
+    <div class="modal" style="max-width:450px;">
+        <div class="modal-header" style="background: var(--danger); color: white; border-bottom: none;">
+            <span>⚠️ Security Warning</span>
+            <button class="icon-btn" style="color:white;" onclick="document.getElementById('warning-modal').classList.remove('open')">×</button>
+        </div>
+        <div class="modal-body" id="warning-modal-body" style="font-size:0.9rem; padding: 25px 20px;">
+        </div>
+        <div style="padding:15px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; background: rgba(0,0,0,0.05);">
+            <button class="btn-fancy" onclick="document.getElementById('warning-modal').classList.remove('open')">
+                <div class="btn-fancy-text">Cancel</div>
+            </button>
+            <button class="btn-fancy btn-primary" style="background:var(--danger); border-color:var(--danger);" id="warning-modal-confirm">
+                <div class="btn-fancy-text">I Understand, Proceed</div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
 
 <script>
+// --- Utils ---
+function escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag]));
+}
+
 // --- Embedded Sources ---
 const sources = {
-    ip: [
+    ip:[
         { id: 'AIPDB', name: 'AbuseIPDB', url: 'https://www.abuseipdb.com/', lookupurl: 'https://www.abuseipdb.com/check/' },
         { id: 'AVOTX', name: 'AlienVault OTX', url: 'https://otx.alienvault.com/', lookupurl: 'https://otx.alienvault.com/indicator/ip/' },
         { id: 'APNIC', name: 'APNIC', url: 'https://wq.apnic.net/', lookupurl: 'https://wq.apnic.net/static/search.html?query=' },
@@ -598,31 +644,46 @@ const sources = {
         { id: 'BGPV', name: 'BGPView', url: 'https://bgpview.io/', lookupurl: 'https://bgpview.io/ip/' },
         { id: 'BRWLR', name: 'Browserling', url: 'https://www.browserling.com/', lookupurl: 'https://www.browserling.com/browse/win10/chrome127/' },
         { id: 'CENS', name: 'Censys', url: 'https://search.censys.io/', lookupurl: 'https://search.censys.io/hosts/' },
+        { id: 'CFRAD', name: 'Cloudflare Radar', url: 'https://radar.cloudflare.com/', lookupurl: 'https://radar.cloudflare.com/scan/search?type=ip&q=' },
         { id: 'DNSLY', name: 'DNSlytics', url: 'https://dnslytics.com/', lookupurl: 'https://dnslytics.com/ip/' },
         { id: 'GGLS', name: 'Google Search', url: 'https://www.google.com', lookupurl: 'https://www.google.com/search?q=site%3A' },
         { id: 'GTREP', name: 'Google Transparency', url: 'https://transparencyreport.google.com/safe-browsing/search', lookupurl: 'https://transparencyreport.google.com/safe-browsing/search?url=' },
         { id: 'GRNOI', name: 'GreyNoise', url: 'https://viz.greynoise.io/', lookupurl: 'https://viz.greynoise.io/ip/' },
+	{ id: 'HEBGP', name: 'Hurricane Electric BGP', url: 'https://www.he.net/', lookupurl: 'https://bgp.he.net/ip/' },
         { id: 'INXL', name: 'IntelX', url: 'https://intelx.io/', lookupurl: 'https://intelx.io/?s=' },
+        { id: 'IPCHK', name: 'IP Checker', url: 'https://www.ip-lookup.org', lookupurl: 'https://www.ip-lookup.org/checker/' },
         { id: 'IP2LOC', name: 'IP2Location', url: 'https://www.ip2location.com/', lookupurl: 'https://www.ip2location.com/demo/' },
+        { id: 'IP2P', name: 'IP2Proxy', url: 'https://www.ip2proxy.com/' },
         { id: 'IPINF', name: 'IPinfo', url: 'https://ipinfo.io/', lookupurl: 'https://ipinfo.io/' },
         { id: 'IPQS', name: 'IPQualityScore', url: 'https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test', lookupurl: 'https://www.ipqualityscore.com/vpn-ip-address-check/lookup/' },
+        { id: 'IPTRK', name: 'ipTRACKERonline', url: 'https://www.iptrackeronline.com/', lookupurl: 'https://www.iptrackeronline.com/ip-lookup/?ip=' },
         { id: 'IPV', name: 'IPVoid', url: 'https://www.ipvoid.com/', lookupurl: 'https://www.ipvoid.com/scan/' },
+	{ id: 'MXTBX', name: 'MXToolbox', url: 'https://mxtoolbox.com/SuperTool.aspx', lookupurl: 'https://mxtoolbox.com/SuperTool.aspx?action=blacklist%3a' },
+        { id: 'NODE', name: 'Nodedata.io', url: 'https://nodedata.io/vpn-detection-test' },
+        { id: 'ORBIT', name: 'Orbit2x', url: 'https://orbit2x.com/ip-lookup' },
         { id: 'RIPE', name: 'RIPE NCC', url: 'https://www.ripe.net/' }, 
+        { id: 'SEC', name: 'Security.org', url: 'https://www.security.org/vpn/ip-address-lookup/' },
         { id: 'SHDN', name: 'Shodan', url: 'https://www.shodan.io', lookupurl: 'https://www.shodan.io/host/' },
         { id: 'SPUR', name: 'Spur', url: 'https://spur.us/' },
         { id: 'TLS', name: 'Talos', url: 'https://talosintelligence.com', lookupurl: 'https://talosintelligence.com/reputation_center/lookup?search=' },
         { id: 'THMNR', name: 'ThreatMiner', url: 'https://www.threatminer.org/', lookupurl: 'https://www.threatminer.org/host.php?q=' },
+	{ id: 'THRFX', name: 'ThreatFox', url: 'https://threatfox.abuse.ch/browse/' },
+	{ id: 'USIO', name: 'URLScan.io', url: 'https://urlscan.io/', lookupurl: 'https://urlscan.io/ip/' },
         { id: 'URLV', name: 'URLVoid', url: 'https://www.urlvoid.com/', lookupurl: 'https://www.urlvoid.com/ip/' },
         { id: 'VALKY', name: 'Valkyrie', url: 'https://verdict.valkyrie.comodo.com/', lookupurl: 'https://verdict.valkyrie.comodo.com/url/ip/result?ip=' },
         { id: 'VT', name: 'VirusTotal', url: 'https://www.virustotal.com/gui/home/search', lookupurl: 'https://www.virustotal.com/gui/ip-address/' },
-        { id: 'WIGLE', name: 'WiGLE', url: 'https://wigle.net/' },
+        { id: 'VPNAPI', name: 'VPNAPI.io', url: 'https://vpnapi.io/vpn-detection' },
+        { id: 'WMIP', name: 'WhatIsMyIP', url: 'https://www.whatismyip.com/ip-address-lookup/' },
         { id: 'WHOIS', name: 'Whois', url: 'https://www.whois.com/whois/', lookupurl: 'https://www.whois.com/whois/' },
-        { id: 'XFE', name: 'X-Force Exchange', url: 'https://exchange.xforce.ibmcloud.com/', lookupurl: 'https://exchange.xforce.ibmcloud.com/ip/' }
+        { id: 'WIGLE', name: 'WiGLE', url: 'https://wigle.net/' },
+        { id: 'XFE', name: 'X-Force Exchange', url: 'https://exchange.xforce.ibmcloud.com/', lookupurl: 'https://exchange.xforce.ibmcloud.com/ip/' },
+        { id: 'DIRECT_OPEN', name: 'Open Raw IOC (DANGER)', url: '', lookupurl: '', isDirect: true }
     ],
-    domain: [
+    domain:[
         { id: 'AIPDB', name: 'AbuseIPDB', url: 'https://www.abuseipdb.com/', lookupurl: 'https://www.abuseipdb.com/check/' },
         { id: 'AVOTX', name: 'AlienVault OTX', url: 'https://otx.alienvault.com/', lookupurl: 'https://otx.alienvault.com/indicator/domain/' },
         { id: 'BRWLR', name: 'Browserling', url: 'https://www.browserling.com/', lookupurl: 'https://www.browserling.com/browse/win10/chrome127/' },
+        { id: 'CFRAD', name: 'Cloudflare Radar', url: 'https://radar.cloudflare.com/', lookupurl: 'https://radar.cloudflare.com/scan/search?type=domain&q=' },
         { id: 'CRT', name: 'crt.sh', url: 'https://crt.sh/' },
         { id: 'DNSD', name: 'DNSDumpster', url: 'https://dnsdumpster.com/' },
         { id: 'DNSLY', name: 'DNSlytics', url: 'https://dnslytics.com/', lookupurl: 'https://dnslytics.com/domain/' },
@@ -633,22 +694,26 @@ const sources = {
         { id: 'ICANN', name: 'ICANN Lookup', url: 'https://lookup.icann.org/' },
         { id: 'INXL', name: 'IntelX', url: 'https://intelx.io/', lookupurl: 'https://intelx.io/?s=' },
         { id: 'IPQS', name: 'IPQualityScore', url: 'https://www.ipqualityscore.com/domain-reputation', lookupurl: 'https://www.ipqualityscore.com/domain-reputation/' },
+	{ id: 'MXTBX', name: 'MXToolbox', url: 'https://mxtoolbox.com/SuperTool.aspx', lookupurl: 'https://mxtoolbox.com/SuperTool.aspx?action=blacklist%3a' },
+	{ id: 'PLSDV', name: 'Pulsedive', url: 'https://pulsedive.com/', lookupurl: 'https://pulsedive.com/ioc/' },
         { id: 'SECTR', name: 'SecurityTrails', url: 'https://securitytrails.com/', lookupurl: 'https://securitytrails.com/domain/' },
         { id: 'SHDN', name: 'Shodan', url: 'https://www.shodan.io', lookupurl: 'https://www.shodan.io/domain/' },
         { id: 'TLS', name: 'Talos', url: 'https://talosintelligence.com', lookupurl: 'https://talosintelligence.com/reputation_center/lookup?search=' },
+	{ id: 'THRFX', name: 'ThreatFox', url: 'https://threatfox.abuse.ch/browse/' },
         { id: 'THMNR', name: 'ThreatMiner', url: 'https://www.threatminer.org/', lookupurl: 'https://www.threatminer.org/domain.php?q=' },
         { id: 'USIO', name: 'URLScan.io', url: 'https://urlscan.io', lookupurl: 'https://urlscan.io/domain/' },
         { id: 'VALKY', name: 'Valkyrie', url: 'https://verdict.valkyrie.comodo.com/', lookupurl: 'https://verdict.valkyrie.comodo.com/url/domain/result?domain=' },
         { id: 'VT', name: 'VirusTotal', url: 'https://www.virustotal.com/gui/home/search', lookupurl: 'https://www.virustotal.com/gui/domain/' },
         { id: 'WBMAC', name: 'Wayback Machine', url: 'https://web.archive.org/', lookupurl: 'https://web.archive.org/web/*/' },
-        { id: 'WOT', name: 'Web of Trust', url: 'https://www.mywot.com/', lookupurl: 'https://www.mywot.com/en/scorecard/' },
         { id: 'WHOIS', name: 'Whois', url: 'https://www.whois.com/whois/', lookupurl: 'https://www.whois.com/whois/' },
         { id: 'WXAPI', name: 'WhoisXML API', url: 'https://whois.whoisxmlapi.com/', lookupurl: 'https://whois.whoisxmlapi.com/lookup/' },
-        { id: 'XFE', name: 'X-Force Exchange', url: 'https://exchange.xforce.ibmcloud.com/', lookupurl: 'https://exchange.xforce.ibmcloud.com/url/' }
+        { id: 'XFE', name: 'X-Force Exchange', url: 'https://exchange.xforce.ibmcloud.com/', lookupurl: 'https://exchange.xforce.ibmcloud.com/url/' },
+        { id: 'DIRECT_OPEN', name: 'Open Raw IOC (DANGER)', url: '', lookupurl: '', isDirect: true }
     ],
-    hash: [
+    hash:[
         { id: 'ARUN', name: 'Any.Run', url: 'https://app.any.run/', lookupurl: 'https://app.any.run/submissions/sample/' },
         { id: 'CIRCL', name: 'CIRCL', url: 'https://hash.circl.lu/' },
+        { id: 'CFRAD', name: 'Cloudflare Radar', url: 'https://radar.cloudflare.com/', lookupurl: 'https://radar.cloudflare.com/scan/search?type=hash&q=' },
         { id: 'CKSAN', name: 'Cuckoo Sandbox', url: 'https://cuckoosandbox.org/', lookupurl: 'https://cuckoosandbox.org/sample/' },
         { id: 'GGLS', name: 'Google Search', url: 'https://www.google.com', lookupurl: 'https://www.google.com/search?q=' },
         { id: 'HYBAN', name: 'Hybrid Analysis', url: 'https://www.hybrid-analysis.com', lookupurl: 'https://www.hybrid-analysis.com/sample/' },
@@ -660,13 +725,14 @@ const sources = {
         { id: 'NIST', name: 'NIST NSRL', url: 'https://www.nist.gov/itl/ssd/software-quality-group/national-software-reference-library-nsrl' },
         { id: 'REVLAB', name: 'ReversingLabs', url: 'https://www.reversinglabs.com/', lookupurl: 'https://analysis.reversinglabs.com/sample/' },
         { id: 'TLS', name: 'Talos', url: 'https://talosintelligence.com', lookupurl: 'https://talosintelligence.com/talos_file_reputation?s=' },
+	{ id: 'THRFX', name: 'ThreatFox', url: 'https://threatfox.abuse.ch/browse/' },
         { id: 'THMNR', name: 'ThreatMiner', url: 'https://www.threatminer.org/', lookupurl: 'https://www.threatminer.org/sample.php?q=' },
         { id: 'TRGE', name: 'Triage', url: 'https://tria.ge/', lookupurl: 'https://tria.ge/sample/' },
         { id: 'VALHA', name: 'Valhalla', url: 'https://valhalla.nextron-systems.com/', lookupurl: 'https://valhalla.nextron-systems.com/sample/' },
         { id: 'VALKY', name: 'Valkyrie', url: 'https://verdict.valkyrie.comodo.com/', lookupurl: 'https://verdict.valkyrie.comodo.com/file/result?s=' },
         { id: 'VT', name: 'VirusTotal', url: 'https://www.virustotal.com/gui/home/search', lookupurl: 'https://www.virustotal.com/gui/file/' }
     ],
-    bookmarks: [
+    bookmarks:[
         { id: 'BCAT', name: 'Bellingcat', url: 'https://www.bellingcat.com/' },
         { id: 'BING', name: 'Bing', url: 'https://www.bing.com/' },
         { id: 'BLCKC', name: 'Blockchain', url: 'https://www.blockchain.com/explorer' },
@@ -687,29 +753,29 @@ const sources = {
         { id: 'OSFMW', name: 'OSINT Framework', url: 'https://osintframework.com/' },
         { id: 'PSTBN', name: 'Pastebin', url: 'https://pastebin.com/' },
         { id: 'PERPX', name: 'Perplexity', url: 'https://www.perplexity.ai/' },
+        { id: 'QRSCN', name: 'QR Code scanner', url: 'https://4qrcode.com/scan-qr-code.php' },
         { id: 'URLSH', name: 'URL Shortener', url: 'https://www.shorturl.at/' },
         { id: 'WBMAC', name: 'Wayback Machine', url: 'https://web.archive.org/' },
-        { id: 'ZOOM', name: 'ZoomEye', url: 'https://www.zoomeye.org/' },
-        { id: 'QRSCN', name: 'QR Code scanner', url: 'https://4qrcode.com/scan-qr-code.php' }
+        { id: 'ZOOM', name: 'ZoomEye', url: 'https://www.zoomeye.org/' }
     ]
 };
 
 const app = {
-    data: { ip: [], domain: [], hash: [] },
+    data: { ip:[], domain:[], hash:[] },
     verdicts: {},
     disabled: {}, 
     sources: {},          
     customSources: [],    
-    favorites: [], 
-    expanded: new Set(), // Track open rows for persistence
-    selected: { ip: [], domain: [], hash: [], bookmarks: [] },
+    favorites: { ip:[], domain:[], hash:[], bookmarks:[] }, 
+    presets: { ip:{1:[],2:[],3:[]}, domain:{1:[],2:[],3:[]}, hash:{1:[],2:[],3:[]}, bookmarks:{1:[],2:[],3:[]} },
+    expanded: new Set(),
+    selected: { ip: [], domain:[], hash: [], bookmarks:[] },
     focusedType: 'bookmarks', 
     editMode: false,
     sortDesc: false,
-    settings: { theme: 'dark', defang: true }
+    settings: { theme: 'dark', defang: true, srcLayoutState: 2, rawLayoutState: 2 }
 };
 
-// Regex patterns for IOC extraction
 const R = {
     ipv4: /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\.|\[\.\]|\(\.\))){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g,
     ipv6: /((?:[0-9a-fA-F]{1,4}(?::|\[:\])){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}(?::|\[:\])){1,7}(?::|\[:\])(?:[0-9a-fA-F]{1,4}(?:(?::|\[:\])[0-9a-fA-F]{1,4})*)?|::(?:[0-9a-fA-F]{1,4}(?:(?::|\[:\])[0-9a-fA-F]{1,4})*)?)/g,
@@ -724,7 +790,8 @@ const els = {
     stackList: document.getElementById('stack-list'),
     ctxGrid: document.getElementById('ctx-grid'),
     ctxTitle: document.getElementById('ctx-header-title'),
-    paneLeft: document.getElementById('pane-left')
+    paneLeft: document.getElementById('pane-left'),
+    paneRight: document.getElementById('pane-right')
 };
 
 // --- Initialization ---
@@ -732,6 +799,8 @@ function init() {
     loadState();
     buildSourceList();
     setupListeners();
+    renderRawLayout();
+    renderSourceLayout();
     renderStack();
     renderContext();
     updateStats();
@@ -741,19 +810,43 @@ function init() {
 function loadState() {
     const s = localStorage.getItem('totalosint_settings');
     if(s) try { app.settings = {...app.settings, ...JSON.parse(s)}; } catch(e){}
+    
+    if(app.settings.twoCol !== undefined) { app.settings.srcLayoutState = app.settings.twoCol ? 2 : 1; delete app.settings.twoCol; }
+    if(app.settings.sourceLayoutState !== undefined) { app.settings.srcLayoutState = app.settings.sourceLayoutState; delete app.settings.sourceLayoutState; }
+    if(app.settings.srcLayoutState === undefined) app.settings.srcLayoutState = 2;
+    if(app.settings.rawLayoutState === undefined) app.settings.rawLayoutState = 2;
+    
     const c = localStorage.getItem('totalosint_custom_sources');
     if(c) try { app.customSources = JSON.parse(c); } catch(e){}
+    
     const f = localStorage.getItem('totalosint_favorites');
-    if(f) try { app.favorites = JSON.parse(f); } catch(e){}
+    if(f) {
+        try { 
+            const pF = JSON.parse(f);
+            if(Array.isArray(pF)) app.favorites = { ip: pF, domain: pF, hash: pF, bookmarks: pF }; 
+            else app.favorites = {...app.favorites, ...pF};
+        } catch(e){}
+    }
+    const p = localStorage.getItem('totalosint_presets');
+    if(p) {
+        try {
+            const pP = JSON.parse(p);
+            if(pP[1] !== undefined) app.presets = { ip: pP, domain: pP, hash: pP, bookmarks: pP };
+            else app.presets = {...app.presets, ...pP};
+        } catch(e){}
+    }
 
     setTheme(app.settings.theme);
     document.getElementById('set-defang').checked = app.settings.defang;
+    document.getElementById('wb-defang').checked = app.settings.defang;
+    document.getElementById('rep-defang').checked = app.settings.defang;
 }
 
 function saveState() {
     localStorage.setItem('totalosint_settings', JSON.stringify(app.settings));
     localStorage.setItem('totalosint_custom_sources', JSON.stringify(app.customSources));
     localStorage.setItem('totalosint_favorites', JSON.stringify(app.favorites));
+    localStorage.setItem('totalosint_presets', JSON.stringify(app.presets));
 }
 
 // --- Logic ---
@@ -777,10 +870,9 @@ function cleanInput(val) {
 
 function analyzeInput() {
     const text = els.input.value;
-    app.data = { ip: [], domain: [], hash: [] };
+    app.data = { ip: [], domain: [], hash:[] };
     highlightInput();
 
-    // Fix de-sync: Force backdrop to match input scroll immediately after highlight update
     setTimeout(() => { els.backdrop.scrollTop = els.input.scrollTop; }, 0);
 
     if(!text.trim()) {
@@ -789,52 +881,39 @@ function analyzeInput() {
         return;
     }
 
-    // Extraction logic
-    const rawIPv6s = text.match(R.ipv6) || [];
-    const rawIPv4s = text.match(R.ipv4) || [];
-    const rawHashes = text.match(R.hash) || [];
-    const rawDomains = text.match(R.domain) || [];
-    const rawURLs = text.match(R.url) || [];
+    const rawIPv6s = text.match(R.ipv6) ||[];
+    const rawIPv4s = text.match(R.ipv4) ||[];
+    const rawHashes = text.match(R.hash) ||[];
+    const rawDomains = text.match(R.domain) ||[];
+    const rawURLs = text.match(R.url) ||[];
 
     rawURLs.forEach(u => {
         const clean = cleanInput(u.replace(/[.,;?!:)"'\]>]+$/, ""));
         app.data.domain.push({ val: clean, sub: 'URL' });
-    });
-
-    [...new Set(rawDomains)].forEach(d => {
+    });[...new Set(rawDomains)].forEach(d => {
         const c = cleanInput(d);
         if(c.match(/^\d+\.\d+\.\d+\.\d+$/)) return;
         app.data.domain.push({ val: c, sub: 'Domain' });
-    });
-
-    [...new Set(rawIPv6s)].forEach(ip => {
+    });[...new Set(rawIPv6s)].forEach(ip => {
         const c = cleanInput(ip);
         if(/[0-9a-fA-F]/.test(c)) app.data.ip.push({ val: c, sub: 'IPv6' });
-    });
-    [...new Set(rawIPv4s)].forEach(ip => app.data.ip.push({ val: cleanInput(ip), sub: 'IPv4' }));
-
-    [...new Set(rawHashes)].forEach(h => {
+    });[...new Set(rawIPv4s)].forEach(ip => app.data.ip.push({ val: cleanInput(ip), sub: 'IPv4' }));[...new Set(rawHashes)].forEach(h => {
         let t = 'MD5';
         if(h.length === 40) t = 'SHA-1';
         if(h.length === 64) t = 'SHA-256';
         app.data.hash.push({ val: h, sub: t });
-    });
-
-    ['ip','domain','hash'].forEach(k => {
+    });['ip','domain','hash'].forEach(k => {
         const unique = new Map();
         app.data[k].forEach(item => unique.set(item.val, item));
-        app.data[k] = Array.from(unique.values()).sort((a,b) => a.val.localeCompare(b.val));
+        app.data[k] = Array.from(unique.values()).sort((a,b) => {
+            if(a.sub !== b.sub) return a.sub.localeCompare(b.sub);
+            return a.val.localeCompare(b.val);
+        });
     });
 
-    // Auto-switch based on priority: IP > Domain > Hash
-    // If multiple types exist, priority takes precedence.
-    if (app.data.ip.length > 0) {
-        setFocus('ip');
-    } else if (app.data.domain.length > 0) {
-        setFocus('domain');
-    } else if (app.data.hash.length > 0) {
-        setFocus('hash');
-    }
+    if (app.data.ip.length > 0) setFocus('ip');
+    else if (app.data.domain.length > 0) setFocus('domain');
+    else if (app.data.hash.length > 0) setFocus('hash');
 
     renderStack();
     updateStats();
@@ -844,7 +923,7 @@ function highlightInput() {
     let text = els.input.value;
     if(!text) { els.backdrop.innerHTML = ''; return; }
     
-    text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    text = escapeHTML(text);
     const wrap = (t, rx, cls) => t.replace(rx, m => {
         if(cls === 'type-ip' && m.includes(':') && !/[0-9a-fA-F]/.test(m)) return m;
         return `<mark class="${cls}">${m}</mark>`
@@ -858,26 +937,45 @@ function highlightInput() {
     els.backdrop.innerHTML = text.replace(/\n/g, '<br>') + '<br>';
 }
 
+function buildSourceUrl(src, itemVal, itemSub, cat, doDefang) {
+    let u = src.url;
+    if(src.isDirect) {
+        u = itemVal;
+        if(!u.startsWith('http') && cat !== 'ip') u = 'http://' + u;
+        else if(!u.startsWith('http')) u = 'https://' + u;
+    } else if(src.lookupurl) {
+        let safeVal = encodeURIComponent(itemVal);
+        if(itemSub === 'IPv6') safeVal = itemVal;
+        u = src.lookupurl + safeVal;
+    }
+    return doDefang ? defang(u) : u;
+}
+
 // --- UI Rendering ---
+function renderRawLayout() { els.paneLeft.className = `pane-left size-${app.settings.rawLayoutState}`; }
+function cycleRawLayout() { app.settings.rawLayoutState = app.settings.rawLayoutState >= 3 ? 1 : app.settings.rawLayoutState + 1; saveState(); renderRawLayout(); }
+
+function renderSourceLayout() { els.paneRight.className = `pane-right size-${app.settings.srcLayoutState}`; els.ctxGrid.className = `sources-grid cols-${app.settings.srcLayoutState}`; }
+function cycleSourceLayout() { app.settings.srcLayoutState = app.settings.srcLayoutState >= 3 ? 1 : app.settings.srcLayoutState + 1; saveState(); renderSourceLayout(); }
+
 function renderStack() {
     els.stackList.innerHTML = '';
     const categories = ['ip', 'domain', 'hash'];
 
     categories.forEach(cat => {
-        const items = app.data[cat] || [];
+        const items = app.data[cat] ||[];
         const isFocused = (app.focusedType === cat);
         const isEmpty = items.length === 0;
         
         const card = document.createElement('div');
         card.className = `stack-card ${isFocused ? 'focused' : ''} ${isEmpty ? 'empty' : ''}`;
         card.dataset.cat = cat;
-        // A11y
         card.setAttribute('tabindex', '0');
         card.setAttribute('role', 'button');
         card.onkeydown = (e) => handleEnter(e, card);
 
         card.onclick = function(e) { 
-            if(this.contains(e.target)) setFocus(cat); 
+            if(this.contains(e.target) && !e.target.closest('.toggle-circle')) setFocus(cat); 
         };
         
         let title = cat === 'ip' ? 'IP Addresses' : cat === 'domain' ? 'Domain / URLs' : 'Hashes';
@@ -896,9 +994,24 @@ function renderStack() {
         items.forEach(item => { if(!groups[item.sub]) groups[item.sub] = []; groups[item.sub].push(item.val); });
 
         Object.keys(groups).sort().forEach(sub => {
+            const isAllDisabled = groups[sub].every(v => app.disabled[v]);
+            const newState = isAllDisabled ? false : true; 
+
             const subHeader = document.createElement('div');
-            subHeader.style.cssText = "font-size:0.7rem; font-weight:700; color:var(--text-muted); background:rgba(0,0,0,0.1); padding:4px 12px; border-bottom:1px solid var(--border); text-transform:uppercase;";
-            subHeader.innerText = sub;
+            subHeader.style.cssText = "font-size:0.7rem; font-weight:700; color:var(--text-muted); background:rgba(0,0,0,0.1); padding:4px 12px; border-bottom:1px solid var(--border); text-transform:uppercase; display:flex; justify-content:space-between; align-items:center;";
+            
+            subHeader.innerHTML = `
+                <span>${escapeHTML(sub)}</span>
+                <div class="toggle-circle sub-header-toggle ${isAllDisabled ? '' : 'on'}" title="Enable/Disable All"></div>
+            `;
+            
+            const subToggle = subHeader.querySelector('.toggle-circle');
+            subToggle.onclick = (e) => {
+                e.stopPropagation();
+                groups[sub].forEach(v => { app.disabled[v] = newState; });
+                renderStack(); updateStats();
+            };
+
             body.appendChild(subHeader);
 
             groups[sub].forEach(val => {
@@ -910,8 +1023,6 @@ function renderStack() {
 
                 const row = document.createElement('div');
                 row.className = `ent-row ${disabled ? 'disabled' : ''} ${isExpanded ? 'expanded' : ''}`;
-                
-                // A11y
                 row.setAttribute('tabindex', '0');
                 row.setAttribute('role', 'button');
                 row.onkeydown = (e) => handleEnter(e, row);
@@ -927,15 +1038,15 @@ function renderStack() {
                     <div class="ent-header">
                         <div class="ent-left">
                             <span class="ent-emoji">${vEmojis[v.status] || ''}</span>
-                            <span class="ent-val" title="Click to Copy">${displayVal}</span>
+                            <span class="ent-val" title="Click to Copy">${escapeHTML(displayVal)}</span>
                         </div>
                         <div class="ent-actions">
-                            <div class="toggle-circle" title="${disabled?'Enable':'Disable'}"></div>
+                            <div class="toggle-circle ${!disabled ? 'on' : ''}" title="${disabled?'Enable':'Disable'}"></div>
                             <div class="ent-arrow"></div>
                         </div>
                     </div>
                     <div class="ent-triage-body">
-                        <select class="form-select" style="width:140px; cursor:pointer;">
+                        <select class="form-select" style="width:140px;">
                             <option value="Untriaged">Untriaged</option>
                             <option value="Unknown">❓ Unknown</option>
                             <option value="Clean">✅ Clean</option>
@@ -943,7 +1054,7 @@ function renderStack() {
                             <option value="Suspicious">⚠️ Suspicious</option>
                             <option value="Malicious">⛔ Malicious</option>
                         </select>
-                        <input class="form-input" style="flex:1; min-width:150px; cursor:text;" placeholder="Notes..." value="${v.note}">
+                        <input class="form-input" style="flex:1; min-width:150px; cursor:text;" placeholder="Notes..." value="${escapeHTML(v.note)}">
                         <button class="icon-btn" title="Copy">📋</button>
                     </div>
                 `;
@@ -975,17 +1086,18 @@ function renderStack() {
 
 function renderContext() {
     const cat = app.focusedType;
-    els.ctxTitle.innerText = cat === 'bookmarks' ? 'Bookmarks' : `${cat.toUpperCase()} Sources`;
+    els.ctxTitle.innerText = cat === 'bookmarks' ? 'Bookmarks' : `Sources (${cat.toUpperCase()})`;
     els.ctxGrid.innerHTML = '';
     
-    let srcs = app.sources[cat] || [];
+    let srcs = app.sources[cat] ||[];
     srcs.sort((a,b) => {
-        const favA = app.favorites.includes(a.id);
-        const favB = app.favorites.includes(b.id);
+        if(a.isDirect) return 1;
+        if(b.isDirect) return -1;
+        const favA = app.favorites[cat] && app.favorites[cat].includes(a.id);
+        const favB = app.favorites[cat] && app.favorites[cat].includes(b.id);
         if(favA && !favB) return -1;
         if(!favA && favB) return 1;
         
-        // Case-insensitive sort
         const nA = a.name.toLowerCase();
         const nB = b.name.toLowerCase();
         return app.sortDesc ? nB.localeCompare(nA) : nA.localeCompare(nB);
@@ -994,41 +1106,50 @@ function renderContext() {
     srcs.forEach((s) => {
         const btn = document.createElement('div');
         const isSel = app.selected[cat] && app.selected[cat].includes(s.id);
-        const isFav = app.favorites.includes(s.id);
+        const isFav = app.favorites[cat] && app.favorites[cat].includes(s.id);
         const isLookup = !!s.lookupurl;
         
         btn.className = `source-btn ${isSel ? 'selected' : ''} ${app.editMode ? 'edit-mode' : ''}`;
-        
-        // A11y
         btn.setAttribute('tabindex', '0');
         btn.setAttribute('role', 'button');
         btn.onkeydown = (e) => handleEnter(e, btn);
 
-        let heartHtml = '';
-        if(app.editMode) {
-             heartHtml = `<span class="src-fav-icon ${isFav ? '' : 'faded'}" onclick="event.stopPropagation(); toggleFav('${s.id}')">💙</span>`;
-        } else if (isFav) {
-             heartHtml = `<span class="src-fav-icon" onclick="event.stopPropagation(); toggleFav('${s.id}')">💙</span>`;
-        }
-
         let editHtml = '';
         if(app.editMode && s.isCustom) {
-            editHtml = `<button class="icon-btn" onclick="openEditSource('${cat}', '${s.id}')" style="font-size:0.8rem;">✏️</button>`;
+            editHtml = `<button class="src-edit-btn" onclick="event.stopPropagation(); openEditSource('${cat}', '${s.id}')">✏️</button>`;
         }
 
-        btn.innerHTML = `
-            <span class="src-name">${s.name}</span>
-            <div class="src-icons">
-                ${heartHtml}
-                ${isLookup ? '<span>🔍</span>' : ''}
-                ${editHtml}
+        const p1 = app.presets[cat] && app.presets[cat][1] && app.presets[cat][1].includes(s.id);
+        const p2 = app.presets[cat] && app.presets[cat][2] && app.presets[cat][2].includes(s.id);
+        const p3 = app.presets[cat] && app.presets[cat][3] && app.presets[cat][3].includes(s.id);
+        
+        let presetHtml = `
+            <div class="src-preset-strip ${app.editMode ? 'edit-mode' : ''} ${(app.editMode || p1 || p2 || p3) ? 'is-visible' : ''}" onclick="event.stopPropagation()">
+                <div class="src-preset-dot p1 ${p1 ? 'active' : ''}" ${app.editMode ? `onclick="togglePreset('${s.id}', 1)"` : ''}></div>
+                <div class="src-preset-dot p2 ${p2 ? 'active' : ''}" ${app.editMode ? `onclick="togglePreset('${s.id}', 2)"` : ''}></div>
+                <div class="src-preset-dot p3 ${p3 ? 'active' : ''}" ${app.editMode ? `onclick="togglePreset('${s.id}', 3)"` : ''}></div>
             </div>
+        `;
+        
+        let favHtml = '';
+        if (app.editMode) favHtml = `<div class="src-fav-icon ${isFav ? '' : 'faded'}" onclick="event.stopPropagation(); toggleFav('${s.id}')">💙</div>`;
+        else if (isFav) favHtml = `<div class="src-fav-icon" style="cursor: default;">💙</div>`;
+        else favHtml = `<div class="src-fav-icon" style="opacity:0; pointer-events:none;">💙</div>`;
+
+        btn.innerHTML = `
+            <span class="src-name" title="${escapeHTML(s.name)}">${escapeHTML(s.name)}</span>
+            <div class="src-icons">
+                <div class="src-lookup-icon" style="${isLookup ? '' : 'opacity:0; pointer-events:none;'}">🔍</div>
+                ${favHtml}
+            </div>
+            ${editHtml}
+            ${presetHtml}
         `;
         
         if(!app.editMode) {
              btn.onclick = (e) => {
-                if(e.target.closest('.src-fav-icon')) return;
-                if(!app.selected[cat]) app.selected[cat] = [];
+                if(e.target.closest('.src-fav-icon') || e.target.closest('.src-preset-strip')) return;
+                if(!app.selected[cat]) app.selected[cat] =[];
                 const arr = app.selected[cat];
                 if(arr.includes(s.id)) app.selected[cat] = arr.filter(x => x !== s.id);
                 else arr.push(s.id);
@@ -1050,7 +1171,6 @@ function setFocus(cat) {
 function updateVerdictStatus(val, status) {
     if(!app.verdicts[val]) app.verdicts[val] = { status: 'Untriaged', note: '' };
     app.verdicts[val].status = status;
-    // Auto-expand this row to ensure the user can see their change if they want to add a note
     app.expanded.add(val);
     renderStack();
 }
@@ -1066,31 +1186,55 @@ function toggleDisable(val) {
     updateStats();
 }
 
+function toggleGlobalDefang(checked) {
+    app.settings.defang = checked;
+    const sd = document.getElementById('set-defang');
+    if(sd) sd.checked = checked;
+    const wd = document.getElementById('wb-defang');
+    if(wd) wd.checked = checked;
+    const rd = document.getElementById('rep-defang');
+    if(rd) rd.checked = checked;
+    saveState();
+    renderStack();
+    generateReport(); 
+}
+
 function copyInput() { copyText(els.input.value); }
 
 function copyText(txt, applyDefangSetting = false) {
     if(app.disabled[txt]) return; 
     let finalTxt = txt;
-    if(applyDefangSetting && app.settings.defang) {
-        finalTxt = defang(txt);
-    }
+    if(applyDefangSetting && app.settings.defang) finalTxt = defang(txt);
     navigator.clipboard.writeText(finalTxt);
     showToast('Copied!', 'success');
 }
 
 function showToast(msg, type) {
-    const t = document.getElementById('toast-el');
-    t.innerHTML = `<span>${type==='success'?'✅':'⚠️'}</span> ${msg}`;
-    t.className = `toast visible ${type}`;
-    setTimeout(() => t.className = 'toast', 2000);
+    const container = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${type==='success'?'✅':type==='warning'?'⚠️':'❌'}</span> <span>${escapeHTML(msg)}</span>`;
+    container.appendChild(t);
+    
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => { t.classList.add('visible'); });
+    });
+    
+    setTimeout(() => {
+        t.classList.remove('visible');
+        setTimeout(() => t.remove(), 300);
+    }, 3000);
 }
 
 function updateStats() {
-    const total = app.data.ip.filter(x=>!app.disabled[x.val]).length + 
-                  app.data.domain.filter(x=>!app.disabled[x.val]).length + 
-                  app.data.hash.filter(x=>!app.disabled[x.val]).length;
-    document.getElementById('stat-ent').innerText = total;
-    document.getElementById('stat-sel').innerText = (app.selected[app.focusedType] || []).length;
+    let totalEnts = 0;['ip', 'domain', 'hash'].forEach(cat => {
+        const active = app.data[cat].filter(x=>!app.disabled[x.val]);
+        totalEnts += active.length;
+    });
+    
+    document.getElementById('stat-ent').innerText = totalEnts;
+    const selIds = app.selected[app.focusedType] ||[];
+    document.getElementById('stat-sel').innerText = selIds.length;
 }
 
 // --- Source Management ---
@@ -1103,8 +1247,7 @@ function toggleSourceEditMode() {
 }
 
 document.addEventListener('click', function(e) {
-    const paneRight = document.getElementById('pane-right');
-    if(app.editMode && !paneRight.contains(e.target) && !e.target.closest('#ctx-edit-toggle')) {
+    if(app.editMode && !els.paneRight.contains(e.target) && !e.target.closest('#ctx-edit-toggle')) {
         toggleSourceEditMode();
     }
 });
@@ -1114,7 +1257,7 @@ function openAddSource() {
     document.getElementById('add-src-trigger').style.display = 'none';
     document.getElementById('add-source-panel').style.display = 'flex';
     document.getElementById('src-delete-btn').classList.add('hidden');
-    setTimeout(() => document.getElementById('pane-right').scrollTop = document.getElementById('pane-right').scrollHeight, 50);
+    setTimeout(() => els.paneRight.scrollTop = els.paneRight.scrollHeight, 50);
 }
 
 function openEditSource(cat, id) {
@@ -1127,7 +1270,7 @@ function openEditSource(cat, id) {
     document.getElementById('src-url').value = s.url;
     document.getElementById('src-lookup').value = s.lookupurl || '';
     document.getElementById('src-edit-id').value = s.id;
-    setTimeout(() => document.getElementById('pane-right').scrollTop = document.getElementById('pane-right').scrollHeight, 50);
+    setTimeout(() => els.paneRight.scrollTop = els.paneRight.scrollHeight, 50);
 }
 
 function closeSourceForm() {
@@ -1150,57 +1293,69 @@ function saveSource() {
 
     if(editId) {
         let cIdx = app.customSources.findIndex(x => x.id === editId);
-        if(cIdx > -1) {
-            app.customSources[cIdx] = { id: editId, type: cat, name, url, lookupurl: lookup };
-        }
+        if(cIdx > -1) app.customSources[cIdx] = { id: editId, type: cat, name, url, lookupurl: lookup };
     } else {
         const id = name.toUpperCase().replace(/[^A-Z]/g, '').slice(0,5) + Math.floor(Math.random()*10000);
         app.customSources.push({ id, type: cat, name, url, lookupurl: lookup });
     }
     
-    saveState();
-    buildSourceList();
-    renderContext();
-    closeSourceForm();
-    showToast("Source Saved", "success");
+    saveState(); buildSourceList(); renderContext(); closeSourceForm(); showToast("Source Saved", "success");
 }
 
 function deleteSource() {
     const id = document.getElementById('src-edit-id').value;
     if(!id || !confirm('Delete this custom source?')) return;
     app.customSources = app.customSources.filter(s => s.id !== id);
-    saveState();
-    buildSourceList();
-    renderContext();
-    closeSourceForm();
+    saveState(); buildSourceList(); renderContext(); closeSourceForm();
 }
 
 function toggleFav(id) {
-    if(app.favorites.includes(id)) app.favorites = app.favorites.filter(x => x !== id);
-    else app.favorites.push(id);
-    saveState();
-    renderContext();
+    const cat = app.focusedType;
+    if(!app.favorites[cat]) app.favorites[cat] = [];
+    if(app.favorites[cat].includes(id)) app.favorites[cat] = app.favorites[cat].filter(x => x !== id);
+    else app.favorites[cat].push(id);
+    saveState(); renderContext();
+}
+
+function togglePreset(id, num) {
+    const cat = app.focusedType;
+    if(!app.presets[cat]) app.presets[cat] = {1:[], 2:[], 3:[]};
+    if(!app.presets[cat][num]) app.presets[cat][num] =[];
+    if(app.presets[cat][num].includes(id)) app.presets[cat][num] = app.presets[cat][num].filter(x => x !== id);
+    else app.presets[cat][num].push(id);
+    saveState(); renderContext();
+}
+
+function selectPreset(num) {
+    const cat = app.focusedType;
+    if(!app.sources[cat]) return;
+    
+    const catPresets = app.presets[cat] || {1:[], 2:[], 3:[]};
+    const totalPresets = (catPresets[1]||[]).length + (catPresets[2]||[]).length + (catPresets[3]||[]).length;
+    
+    if (totalPresets === 0) return showToast('No Presets configured. Use Edit mode to setup Presets.', 'warning');
+    
+    const presetIds = catPresets[num] || [];
+    const matchingIds = app.sources[cat].map(s => s.id).filter(id => presetIds.includes(id));
+    app.selected[cat] = [...matchingIds];
+    renderContext(); updateStats();
 }
 
 function toggleSelectAll() {
     const cat = app.focusedType;
     if(!app.sources[cat]) return;
-    
     const allIds = app.sources[cat].map(s => s.id);
-    const currentlySelected = app.selected[cat] || [];
-    
+    const currentlySelected = app.selected[cat] ||[];
     if(currentlySelected.length > 0) app.selected[cat] = [];
-    else app.selected[cat] = [...allIds];
-    
-    renderContext();
-    updateStats();
+    else app.selected[cat] =[...allIds];
+    renderContext(); updateStats();
 }
 
 function toggleSort() { app.sortDesc = !app.sortDesc; renderContext(); }
 
 function executeInvestigation() {
     const cat = app.focusedType;
-    const selIds = app.selected[cat] || [];
+    const selIds = app.selected[cat] ||[];
     
     if(cat === 'bookmarks') {
         if(selIds.length === 0) return showToast('Select bookmarks first.', 'error');
@@ -1213,65 +1368,133 @@ function executeInvestigation() {
 
     const items = app.data[cat].filter(x => !app.disabled[x.val]);
     const uniqueUrls = new Set();
+    let hasDirect = false;
     
     if (items.length > 0) {
-        // Entities exist: Generate Lookup URLs
+        const groupedItems = {};
         items.forEach(obj => {
-            app.sources[cat].filter(s => selIds.includes(s.id)).forEach(src => {
-                let u = src.url;
-                if(src.lookupurl) {
-                    // IPv6 encoding fix: Do not encode colons for standard lookups unless tool specific
-                    let safeVal = encodeURIComponent(obj.val);
-                    if(obj.sub === 'IPv6') safeVal = obj.val; // Send raw colons
-                    
-                    u = src.lookupurl + safeVal;
-                }
-                uniqueUrls.add(u);
+            if(!groupedItems[obj.sub]) groupedItems[obj.sub] = [];
+            groupedItems[obj.sub].push(obj);
+        });
+
+        Object.keys(groupedItems).sort().forEach(sub => {
+            groupedItems[sub].forEach(obj => {
+                app.sources[cat].filter(s => selIds.includes(s.id)).forEach(src => {
+                    if(src.isDirect) hasDirect = true;
+                    uniqueUrls.add(buildSourceUrl(src, obj.val, obj.sub, cat, false));
+                });
             });
         });
     } else {
-        // No entities: Open Base URLs of selected sources
         app.sources[cat].filter(s => selIds.includes(s.id)).forEach(src => {
-            uniqueUrls.add(src.url);
+            if(!src.isDirect) uniqueUrls.add(src.url);
         });
     }
 
     const urls = Array.from(uniqueUrls);
     if(urls.length === 0) return showToast('No URLs generated.', 'error');
-    if(urls.length > 20 && !confirm(`Open ${urls.length} tabs?`)) return;
+    
+    let warnings =[];
+    if(hasDirect) warnings.push("You selected <b>Open Raw IOC (DANGER)</b>. This will directly open raw IPs/Domains in your browser, which is potentially dangerous and could expose you to malicious content.");
+    if(urls.length > 20) warnings.push(`You are about to open <b>${urls.length} tabs</b> at once. Your browser may block them or slow down significantly.`);
+
+    if(warnings.length > 0) {
+        document.getElementById('warning-modal-body').innerHTML = warnings.map(w => `<p style="margin-bottom:10px;">${w}</p>`).join('');
+        document.getElementById('warning-modal').classList.add('open');
+        document.getElementById('warning-modal-confirm').onclick = () => {
+            document.getElementById('warning-modal').classList.remove('open');
+            urls.forEach(u => window.open(u, '_blank'));
+        };
+        return;
+    }
     urls.forEach(u => window.open(u, '_blank'));
 }
 
 // --- Reporting ---
+function setLabelDisabledState(id, disabled) {
+    const el = document.getElementById(id);
+    if(el) {
+        el.disabled = disabled;
+        el.parentElement.style.opacity = disabled ? '0.5' : '1';
+        el.parentElement.style.textDecoration = disabled ? 'line-through' : 'none';
+        if(disabled) el.parentElement.classList.add('disabled-label');
+        else el.parentElement.classList.remove('disabled-label');
+    }
+}
+
+function setRepFormat(mode) {
+    document.getElementById('rep-mode').value = mode;
+    const fBtn = document.getElementById('fmt-full-btn');
+    const sBtn = document.getElementById('fmt-simple-btn');
+    if(mode === 'full') { fBtn.classList.add('active'); sBtn.classList.remove('active'); } 
+    else { sBtn.classList.add('active'); fBtn.classList.remove('active'); }
+    generateReport();
+}
+
 function openReportModal() {
+    const ipHas = app.data.ip.length > 0;
+    const domHas = app.data.domain.length > 0;
+    const hashHas = app.data.hash.length > 0;
+    
+    const ipSrcHas = app.selected.ip && app.selected.ip.length > 0;
+    const domSrcHas = app.selected.domain && app.selected.domain.length > 0;
+    const hashSrcHas = app.selected.hash && app.selected.hash.length > 0;
+    
+    const totalEntities = (ipHas?1:0) + (domHas?1:0) + (hashHas?1:0);
+    const anySrcSel = ipSrcHas || domSrcHas || hashSrcHas;
+    const noEnts = totalEntities === 0;
+    
+    if (noEnts && !anySrcSel) {
+        return showToast('No data or sources selected for report.', 'warning');
+    }
+
     const modal = document.getElementById('report-modal');
     modal.classList.add('open');
     
-    // Check if any entities exist globally
-    const totalEntities = app.data.ip.length + app.data.domain.length + app.data.hash.length;
-    
-    if (totalEntities === 0) {
-        // Force Simple List and Check References to make UI useful for "Reference only" usage
-        document.getElementById('rep-mode').value = 'simple';
-        document.getElementById('rep-simple-refs').checked = true;
-        document.getElementById('rep-defang').checked = false; // No need to defang base URLs
+    if (noEnts) {
+        setRepFormat('simple');
+        document.getElementById('fmt-full-btn').disabled = true;
+        document.getElementById('rep-simple-refs').checked = anySrcSel;
+    } else {
+        document.getElementById('fmt-full-btn').disabled = false;
     }
     
-    toggleSepCount(); 
+    const incIp = ipHas || ipSrcHas;
+    const incDom = domHas || domSrcHas;
+    const incHash = hashHas || hashSrcHas;
+    
+    document.getElementById('rep-inc-ip').checked = incIp;
+    document.getElementById('rep-inc-domain').checked = incDom;
+    document.getElementById('rep-inc-hash').checked = incHash;
+
+    setLabelDisabledState('rep-inc-ip', !incIp);
+    setLabelDisabledState('rep-inc-domain', !incDom);
+    setLabelDisabledState('rep-inc-hash', !incHash);
+    
+    setLabelDisabledState('rep-refs', !anySrcSel);
+    setLabelDisabledState('rep-simple-refs', !anySrcSel);
+    
+    setLabelDisabledState('rep-verdict', noEnts);
+    setLabelDisabledState('rep-space', noEnts);
+    setLabelDisabledState('rep-defang', !(anySrcSel || !noEnts)); 
+    
+    document.getElementById('rep-quote').disabled = noEnts;
+    document.getElementById('rep-sep-type').disabled = noEnts;
+    document.getElementById('rep-list-style').disabled = noEnts;
+    
+    if (noEnts) document.getElementById('rep-sep-count').disabled = true;
+    else toggleSepCount(); 
+    
     generateReport();
     
-    const ids = ['rep-inc-ip','rep-inc-domain','rep-inc-hash','rep-mode','rep-defang','rep-refs','rep-verdict','rep-space','rep-list-style','rep-quote','rep-simple-refs'];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.onchange = generateReport;
-    });
+    const ids =['rep-inc-ip','rep-inc-domain','rep-inc-hash','rep-defang','rep-refs','rep-verdict','rep-space','rep-list-style','rep-quote','rep-simple-refs'];
+    ids.forEach(id => { const el = document.getElementById(id); if(el) el.onchange = generateReport; });
 }
 
 function toggleSepCount() {
     const type = document.getElementById('rep-sep-type').value;
     const countEl = document.getElementById('rep-sep-count');
-    const disabled = (type === 'newline' || type === 'comma');
-    countEl.disabled = disabled;
+    countEl.disabled = document.getElementById('rep-sep-type').disabled || (type === 'newline' || type === 'comma');
     generateReport();
 }
 
@@ -1279,22 +1502,17 @@ function generateReport() {
     const mode = document.getElementById('rep-mode').value;
     const isFull = mode === 'full';
     
-    // Toggle hidden class instead of relying on !important override
     const fullOpts = document.getElementById('rep-opts-full');
     const simpleOpts = document.getElementById('rep-opts-simple');
     const sepStyle = document.getElementById('rep-style-sep');
     const listStyle = document.getElementById('rep-style-list');
 
     if (isFull) {
-        fullOpts.classList.remove('hidden');
-        simpleOpts.classList.add('hidden');
-        sepStyle.classList.remove('hidden');
-        listStyle.classList.add('hidden');
+        fullOpts.classList.remove('hidden'); simpleOpts.classList.add('hidden');
+        sepStyle.classList.remove('hidden'); listStyle.classList.add('hidden');
     } else {
-        fullOpts.classList.add('hidden');
-        simpleOpts.classList.remove('hidden');
-        sepStyle.classList.add('hidden');
-        listStyle.classList.remove('hidden');
+        fullOpts.classList.add('hidden'); simpleOpts.classList.remove('hidden');
+        sepStyle.classList.add('hidden'); listStyle.classList.remove('hidden');
     }
 
     const defangRep = document.getElementById('rep-defang').checked;
@@ -1302,8 +1520,8 @@ function generateReport() {
     const q = quoteMap[document.getElementById('rep-quote').value] || "";
     
     let blocks = [];
+    const cats =[];
     
-    const cats = [];
     if(document.getElementById('rep-inc-ip').checked) cats.push('ip');
     if(document.getElementById('rep-inc-domain').checked) cats.push('domain');
     if(document.getElementById('rep-inc-hash').checked) cats.push('hash');
@@ -1311,10 +1529,10 @@ function generateReport() {
     cats.forEach(cat => {
         const items = app.data[cat].filter(x => !app.disabled[x.val]);
         const showRefsSimple = document.getElementById('rep-simple-refs').checked;
+        const selIds = app.selected[cat] ||[];
         const onlyRefs = (items.length === 0 && mode === 'simple' && showRefsSimple);
 
-        // Skip category if empty AND we aren't just trying to list base references
-        if(items.length === 0 && !onlyRefs) return;
+        if(items.length === 0 && (!onlyRefs || selIds.length === 0)) return;
         
         let headerTitle = cat === 'ip' ? 'IP Addresses' : cat === 'domain' ? 'Domain / URLs' : 'Hashes';
         let sectionText = "";
@@ -1331,21 +1549,17 @@ function generateReport() {
             let separator = "";
             let fullSep = "";
             
-            if (sepType === 'newline') {
-                fullSep = useSpace ? "\n\n\n\n" : "\n\n"; 
-            } else if (sepType === 'comma') {
-                fullSep = useSpace ? "\n\n,\n\n" : "\n,\n";
-            } else {
+            if (sepType === 'newline') fullSep = useSpace ? "\n\n\n\n" : "\n\n"; 
+            else if (sepType === 'comma') fullSep = useSpace ? "\n\n,\n\n" : "\n,\n";
+            else {
                 let char = '-';
                 if(sepType === 'eq') char = '=';
                 if(sepType === 'us') char = '_';
                 separator = char.repeat(sepCount);
-                
-                if (useSpace) fullSep = `\n\n${separator}\n\n`;
-                else fullSep = `\n${separator}\n`;
+                fullSep = useSpace ? `\n\n${separator}\n\n` : `\n${separator}\n`;
             }
 
-            let entryBlocks = [];
+            let entryBlocks =[];
 
             items.forEach((obj) => {
                 let entry = "";
@@ -1359,38 +1573,28 @@ function generateReport() {
                 }
                 
                 if(showRefs) {
-                    const selIds = app.selected[cat] || [];
                     const activeSrcs = app.sources[cat].filter(s => selIds.includes(s.id));
                     if(activeSrcs.length > 0) {
                         entry += `\nReferences:`;
                         activeSrcs.forEach(src => {
-                            let u = src.url;
-                            if(src.lookupurl) {
-                                let safeVal = encodeURIComponent(obj.val);
-                                if(obj.sub === 'IPv6') safeVal = obj.val;
-                                u = src.lookupurl + safeVal;
-                            }
-                            if(defangRep) u = defang(u); 
-                            entry += `\n- ${u}`;
+                            entry += `\n- ${buildSourceUrl(src, obj.val, obj.sub, cat, defangRep)}`;
                         });
                     }
                 }
                 entryBlocks.push(entry);
             });
-            
             sectionText += entryBlocks.join(fullSep);
             
         } else {
-            // Simple List Mode
             const style = document.getElementById('rep-list-style').value;
-            
-            sectionText += `===== ${headerTitle} =====\n\n`;
+            sectionText += `===== ${headerTitle} =====`;
             
             if (items.length > 0) {
+                sectionText += `\n\n`;
                 const groups = {};
-                items.forEach(item => { if(!groups[item.sub]) groups[item.sub] = []; groups[item.sub].push(item.val); });
+                items.forEach(item => { if(!groups[item.sub]) groups[item.sub] =[]; groups[item.sub].push(item.val); });
 
-                let subBlocks = [];
+                let subBlocks =[];
 
                 Object.keys(groups).sort().forEach(sub => {
                     let subBlock = `${sub}s:\n`; 
@@ -1408,47 +1612,48 @@ function generateReport() {
                     }
                     subBlocks.push(subBlock);
                 });
-
                 sectionText += subBlocks.join('\n\n');
-            } else if (onlyRefs) {
-                sectionText += "(No Entities Extracted)\n";
+            } else if (!onlyRefs) {
+                sectionText += `\n\n(No Entities Extracted)`;
             }
             
             if(showRefsSimple) {
-                const allUrls = new Set();
-                const selIds = app.selected[cat] || [];
                 const activeSrcs = app.sources[cat].filter(s => selIds.includes(s.id));
                 
                 if (items.length > 0) {
-                    // Generate specific lookup URLs
+                    let refsBySub = {};
                     items.forEach(obj => {
+                         if(!refsBySub[obj.sub]) refsBySub[obj.sub] = new Set();
                          activeSrcs.forEach(src => {
-                            let u = src.url;
-                            if(src.lookupurl) {
-                                let safeVal = encodeURIComponent(obj.val);
-                                if(obj.sub === 'IPv6') safeVal = obj.val;
-                                u = src.lookupurl + safeVal;
-                            }
-                            if(defangRep) u = defang(u);
-                            allUrls.add(u);
+                            refsBySub[obj.sub].add(buildSourceUrl(src, obj.val, obj.sub, cat, defangRep));
                          });
                     });
-                } else {
-                    // Generate Base URLs only
-                    activeSrcs.forEach(src => {
-                        let u = src.url;
-                        if(defangRep) u = defang(u);
-                        allUrls.add(u);
+                    
+                    let seenUrls = new Set();
+                    let finalUrls =[];
+                    Object.keys(refsBySub).sort().forEach(sub => {
+                        Array.from(refsBySub[sub]).forEach(u => {
+                            if(!seenUrls.has(u)) { seenUrls.add(u); finalUrls.push(u); }
+                        });
                     });
-                }
-
-                if(allUrls.size > 0) {
-                    sectionText += "\n\nReferences:\n";
-                    sectionText += Array.from(allUrls).map(u => `- ${u}`).join('\n');
+                    
+                    if(finalUrls.length > 0) {
+                        sectionText += "\n\nReferences:\n";
+                        sectionText += finalUrls.map(u => `- ${u}`).join('\n');
+                    }
+                } else {
+                    const allUrls = new Set();
+                    activeSrcs.forEach(src => {
+                        if(!src.isDirect) allUrls.add(defangRep ? defang(src.url) : src.url);
+                    });
+                    if(allUrls.size > 0) {
+                        sectionText += "\n\nReferences:\n";
+                        sectionText += Array.from(allUrls).map(u => `- ${u}`).join('\n');
+                    }
                 }
             }
         }
-        blocks.push(sectionText);
+        blocks.push(sectionText.trim());
     });
 
     let finalText = blocks.join('\n\n\n');
@@ -1469,7 +1674,7 @@ function setTheme(t) {
     saveState();
 }
 function generateBackup() {
-    const backup = { customSources: app.customSources, favorites: app.favorites };
+    const backup = { customSources: app.customSources, favorites: app.favorites, presets: app.presets, settings: app.settings };
     document.getElementById('backup-area').value = JSON.stringify(backup, null, 2);
     showToast("Backup Generated", "success");
 }
@@ -1478,22 +1683,35 @@ function restoreBackup() {
         const j = JSON.parse(document.getElementById('backup-area').value);
         if(j.customSources) app.customSources = j.customSources;
         if(j.favorites) app.favorites = j.favorites;
+        if(j.presets) app.presets = j.presets;
+        if(j.settings) {
+            app.settings = {...app.settings, ...j.settings};
+            setTheme(app.settings.theme);
+            document.getElementById('set-defang').checked = app.settings.defang;
+            document.getElementById('wb-defang').checked = app.settings.defang;
+            document.getElementById('rep-defang').checked = app.settings.defang;
+            renderRawLayout();
+            renderSourceLayout();
+        }
         saveState();
         buildSourceList();
         renderStack(); renderContext();
-        showToast("Restored!", "success");
-    } catch(e) { showToast("Invalid JSON", "error"); }
-}
-function defang(s) { 
-    return s.replace(/\./g, '[.]').replace(/:/g, '[:]').replace(/http/gi, 'hxxp').replace(/\[:\]\/\//g, '[://]'); 
-}
-function hardReset() { 
-    els.input.value = ''; 
-    analyzeInput(); 
-    els.input.focus();
+        showToast("Restored successfully!", "success");
+    } catch(e) { showToast("Invalid JSON format", "error"); }
 }
 
-// Helper: Debounce (Delay execution)
+function defang(s) { return s.replace(/\./g, '[.]').replace(/:/g, '[:]').replace(/http/gi, 'hxxp').replace(/\[:\]\/\//g, '[://]'); }
+
+function hardReset() { 
+    els.input.value = ''; 
+    app.disabled = {};
+    app.verdicts = {};
+    app.expanded = new Set();
+    analyzeInput(); 
+    els.input.focus();
+    showToast("Data and entities cleared", "success");
+}
+
 function debounce(func, wait) {
     let timeout;
     return function(...args) {
@@ -1502,27 +1720,11 @@ function debounce(func, wait) {
     };
 }
 
-// Helper: A11y Enter Key
 function handleEnter(e, el) {
     if(e.key === 'Enter' || e.key === ' ') {
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
         e.preventDefault();
         el.click();
-    }
-}
-
-// --- Responsive Resetter ---
-// Clears manual size styles when crossing breakpoints
-function setupResponsiveReset() {
-    const mq = window.matchMedia('(max-width: 900px)');
-    const reset = () => {
-        els.paneLeft.style.width = '';
-        els.paneLeft.style.height = '';
-    };
-    try {
-        mq.addEventListener('change', reset);
-    } catch(e) {
-        // Fallback for older browsers
-        mq.addListener(reset);
     }
 }
 
@@ -1530,19 +1732,17 @@ function setupListeners() {
     const input = els.input;
     const backdrop = els.backdrop;
     
-    // Debounce analysis for performance (300ms)
     input.addEventListener('input', debounce(analyzeInput, 300));
+    input.addEventListener('scroll', () => { backdrop.scrollTop = input.scrollTop; backdrop.scrollLeft = input.scrollLeft; });
     
-    // Sync scroll instantly
-    input.addEventListener('scroll', () => { 
-        backdrop.scrollTop = input.scrollTop; 
-        backdrop.scrollLeft = input.scrollLeft; 
+    let modalMousedownObj = null;
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+        m.addEventListener('mousedown', (e) => { modalMousedownObj = e.target; });
+        m.addEventListener('mouseup', (e) => {
+            if (e.target === m && modalMousedownObj === m) m.classList.remove('open');
+            modalMousedownObj = null;
+        });
     });
-    
-    document.getElementById('set-defang').onchange = (e) => { app.settings.defang = e.target.checked; saveState(); renderStack(); };
-    document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', (e) => { if(e.target===m) m.classList.remove('open'); }));
-    
-    setupResponsiveReset();
 }
 document.addEventListener('DOMContentLoaded', init);
 </script>
