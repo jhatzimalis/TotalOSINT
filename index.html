@@ -128,7 +128,7 @@
         .pane-header-container { padding: 0; height: auto; flex-direction: column; border-bottom: none; background: var(--bg-panel); flex-shrink: 0; }
         .pane-header-title { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 36px; padding: 0 12px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; box-sizing: border-box; }
         
-        .pane-sub-toolbar { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 26px; padding: 0px 10px; background: var(--bg-subheader); border-bottom: 1px solid var(--border); box-sizing: border-box; }
+        .pane-sub-toolbar { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 26px; padding: 0 10px; background: var(--bg-subheader); border-bottom: 1px solid var(--border); box-sizing: border-box; }
         
         .pane-left.size-1 { width: 220px; }
         .pane-left.size-2 { width: 340px; }
@@ -241,7 +241,7 @@
         .src-preset-dot.p3.active, .src-preset-strip.edit-mode .src-preset-dot.p3:hover { background: var(--danger); }
 
         /* Bottom Toolbar */
-        .toolbar { height: 44px; border-top: 1px solid var(--border); background: var(--bg-panel); display: flex; align-items: center; justify-content: center; padding: 0 15px 2px 15px; z-index: 20; flex-shrink: 0; gap: 15px; }
+        .toolbar { height: 42px; border-top: 1px solid var(--border); background: var(--bg-panel); display: flex; align-items: center; justify-content: center; padding: 0 15px 1px 15px; z-index: 20; flex-shrink: 0; gap: 15px; }
         .toolbar-stats { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; justify-content: center; min-width: 80px; text-align: right; }
         .stat-container { display: flex; align-items: center; justify-content: space-between; width: 100%; font-size: 0.75rem; gap: 10px; color: var(--text-muted); }
         .stat-val { color: var(--text-main); font-weight: 700; margin-left: auto; }
@@ -1505,9 +1505,9 @@ function openReportModal() {
         setLabelDisabledState('rep-defang', true);
         setLabelDisabledState('rep-refs', true);
         
-        // Ensure simple refs toggle is active since Bookmarks act as references
-        setLabelDisabledState('rep-simple-refs', false);
+        // Ensure simple refs toggle is active and locked since Bookmarks act as references
         document.getElementById('rep-simple-refs').checked = true;
+        setLabelDisabledState('rep-simple-refs', true);
         
         setLabelDisabledState('rep-verdict', true);
         setLabelDisabledState('rep-space', true);
@@ -1520,8 +1520,6 @@ function openReportModal() {
         document.getElementById('report-modal').classList.add('open');
         generateReport();
         
-        const bmkIds = ['rep-simple-refs'];
-        bmkIds.forEach(id => { const el = document.getElementById(id); if(el) el.onchange = generateReport; });
         return;
     }
 
@@ -1603,7 +1601,7 @@ function generateReport() {
 
     // Handle Bookmarks Special Report
     if (isBookmarks) {
-        let text = "===== Bookmarks =====\n\n(No Entities Extracted)";
+        let text = "===== Bookmarks =====";
         const showRefs = document.getElementById('rep-simple-refs').checked;
         
         if (showRefs) {
