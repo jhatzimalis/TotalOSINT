@@ -97,8 +97,7 @@
             background: var(--bg-panel); color: var(--text-main); cursor: pointer; transition: all 0.1s; overflow: hidden; height: 34px;
             user-select: none; min-width: 0;
         }
-        .btn-fancy:hover { border-color: var(--accent); transform: translateY(-1px); }
-        .btn-fancy:active { transform: translateY(0); }
+        .btn-fancy:hover { border-color: var(--accent); }
         
         .btn-fancy-icon { width: 34px; background: rgba(125,125,125,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; border-right: 1px solid var(--border); flex-shrink: 0; }
         .btn-fancy-text { flex: 1; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 0.85rem; padding: 0 10px; white-space: nowrap; }
@@ -117,7 +116,7 @@
         .form-select:disabled { opacity: 0.5; cursor: default !important; text-decoration: line-through; }
 
         /* --- Header --- */
-        header { background: var(--bg-header); color: var(--text-light); height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); flex-shrink: 0; z-index:20; }
+        header { background: var(--bg-header); color: var(--text-light); height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); flex-shrink: 0; z-index:20; }
         .branding { display: flex; align-items: center; cursor: pointer; user-select: none; }
         .logo-text { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; white-space: nowrap; margin-left: 4px; }
 
@@ -129,7 +128,7 @@
         .pane-header-container { padding: 0; height: auto; flex-direction: column; border-bottom: none; background: var(--bg-panel); flex-shrink: 0; }
         .pane-header-title { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 36px; padding: 0 12px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; box-sizing: border-box; }
         
-        .pane-sub-toolbar { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 26px; padding: 0 10px; background: var(--bg-subheader); border-bottom: 1px solid var(--border); box-sizing: border-box; }
+        .pane-sub-toolbar { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 26px; padding: 0px 10px; background: var(--bg-subheader); border-bottom: 1px solid var(--border); box-sizing: border-box; }
         
         .pane-left.size-1 { width: 220px; }
         .pane-left.size-2 { width: 340px; }
@@ -201,7 +200,7 @@
         .sources-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
         
         .source-btn { display: flex; align-items: stretch; padding: 0 0 0 10px; border: 1px solid var(--border); height: 34px; border-radius: var(--radius); cursor: pointer; background: var(--bg-panel); font-size: 0.8rem; font-weight: 500; transition: all 0.1s; position: relative; overflow: hidden; }
-        .source-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .source-btn:hover { border-color: var(--accent); }
         .source-btn.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); box-shadow: inset 3px 0 0 var(--accent); }
         .source-btn.edit-mode { border-style: dashed; }
 
@@ -242,7 +241,7 @@
         .src-preset-dot.p3.active, .src-preset-strip.edit-mode .src-preset-dot.p3:hover { background: var(--danger); }
 
         /* Bottom Toolbar */
-        .toolbar { height: 44px; border-top: 1px solid var(--border); background: var(--bg-panel); display: flex; align-items: center; justify-content: center; padding: 0 15px; z-index: 20; flex-shrink: 0; gap: 15px; }
+        .toolbar { height: 44px; border-top: 1px solid var(--border); background: var(--bg-panel); display: flex; align-items: center; justify-content: center; padding: 0 15px 2px 15px; z-index: 20; flex-shrink: 0; gap: 15px; }
         .toolbar-stats { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; justify-content: center; min-width: 80px; text-align: right; }
         .stat-container { display: flex; align-items: center; justify-content: space-between; width: 100%; font-size: 0.75rem; gap: 10px; color: var(--text-muted); }
         .stat-val { color: var(--text-main); font-weight: 700; margin-left: auto; }
@@ -265,14 +264,14 @@
         input[type="checkbox"] { accent-color: var(--accent); }
 
         /* Toast Container */
-        .toast-container { position: fixed; bottom: 25px; right: 25px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; pointer-events: none; }
+        .toast-container { position: fixed; bottom: 60px; right: 25px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; pointer-events: none; }
         .toast { background: #333; color: white; padding: 12px 20px; border-radius: 6px; opacity: 0; transform: translateX(20px); transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-weight: 500; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); pointer-events: auto; }
         .toast.visible { opacity: 1; transform: translateX(0); }
         .toast.success { background: var(--success); }
         .toast.error { background: var(--danger); }
         .toast.warning { background: var(--warning); color: #111; }
 
-        .backup-textarea { width: 100%; height: 50px; min-height: 50px; max-height: 200px; background: var(--bg-body); color: var(--accent); border: 1px solid var(--border); font-family: monospace; padding: 8px; font-size: 0.75rem; resize: vertical; margin-bottom: 10px; }
+        .backup-textarea { width: 100%; height: 50px; min-height: 50px; max-height: 200px; background: var(--bg-body); color: var(--accent); border: 1px solid var(--border); font-family: monospace; padding: 8px; font-size: 0.75rem; resize: vertical; margin-bottom: 0px; }
         
         /* Report Modal Specifics */
         .report-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; background: var(--bg-body); padding: 10px; border-radius: 4px; border: 1px solid var(--border); }
@@ -307,7 +306,7 @@
             .pane-right.size-2 { height: 220px; }
             .pane-right.size-3 { height: 300px; }
             .sources-grid.cols-1, .sources-grid.cols-2, .sources-grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
-            .toolbar { gap: 10px; padding: 0 10px; flex-direction: row; align-items: center; justify-content: center; }
+            .toolbar { gap: 10px; padding: 0 10px 1px 10px; flex-direction: row; align-items: center; justify-content: center; }
         }
         
         .theme-card { border: 2px solid var(--border); padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; opacity: 0.7; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
@@ -361,12 +360,16 @@
         <div class="pane-header-container">
             <div class="pane-header-title">
                 <span>Workbench</span>
-                <button class="btn-fancy btn-sm" onclick="setFocus('bookmarks')">
-                    <div class="btn-fancy-icon" style="color:var(--text-main);">🔖</div>
-                    <div class="btn-fancy-text" style="color:var(--text-muted);">Bookmarks</div>
-                </button>
+                <div style="display: flex; gap: 4px;">
+                    <button class="icon-btn" onclick="openReportModal()" title="Generate Report">📜</button>
+                    <button class="icon-btn" onclick="executeInvestigation()" title="Open Investigations">🚀</button>
+                </div>
             </div>
-            <div class="pane-sub-toolbar" style="justify-content: flex-end;">
+            <div class="pane-sub-toolbar" style="justify-content: space-between;">
+                <button class="btn-fancy" style="height: 20px; border-radius: 4px;" onclick="setFocus('bookmarks')" title="Bookmarks">
+                    <div class="btn-fancy-icon" style="width: 20px; font-size: 0.75rem; border-right: 1px solid var(--border);">🔖</div>
+                    <div class="btn-fancy-text" style="font-size: 0.7rem; padding: 0 6px;">Bookmarks</div>
+                </button>
                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer;" title="Global Defang">
                     <span style="font-size:0.7rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Defang</span>
                     <div class="toggle-switch" style="transform: scale(0.75); width:30px; margin:0; transform-origin: right center;">
@@ -461,9 +464,14 @@
             <div class="report-controls">
                 <div class="control-group">
                     <div class="control-label">Include</div>
-                    <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-ip"><input type="checkbox" id="rep-inc-ip"> IP Address</label>
-                    <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-domain"><input type="checkbox" id="rep-inc-domain"> Domain / URL</label>
-                    <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-hash"><input type="checkbox" id="rep-inc-hash"> Hash</label>
+                    <div id="rep-inc-standard" style="display:contents">
+                        <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-ip"><input type="checkbox" id="rep-inc-ip"> IP Address</label>
+                        <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-domain"><input type="checkbox" id="rep-inc-domain"> Domain / URL</label>
+                        <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-hash"><input type="checkbox" id="rep-inc-hash"> Hash</label>
+                    </div>
+                    <div id="rep-inc-bookmarks" class="hidden" style="display:contents">
+                        <label class="flex-gap" style="font-size:0.85rem;" id="lbl-inc-bkmk"><input type="checkbox" id="rep-inc-bkmk" checked disabled> Bookmarks</label>
+                    </div>
                 </div>
                 
                 <div class="control-group">
@@ -501,6 +509,7 @@
                                 <option value="">None</option>
                                 <option value="'">Single (')</option>
                                 <option value='"'>Double (")</option>
+                                <option value="`">Backtick (`)</option>
                             </select>
                         </div>
 
@@ -530,6 +539,8 @@
                                 <option value="bullet*">Bullet (*)</option>
                                 <option value="newline">Newline</option>
                                 <option value="comma">Comma</option>
+                                <option value="and">And</option>
+                                <option value="or">Or</option>
                             </select>
                         </div>
                     </div>
@@ -588,17 +599,21 @@
                 <label style="font-weight:600; display:block; margin-bottom:5px; cursor:default;">Data Backup / Restore</label>
                 <p class="text-muted" style="font-size:0.8rem; margin:0 0 10px 0;">Export your Custom Sources, Favorites, Presets, and Settings to JSON text.</p>
                 <textarea id="backup-area" class="backup-textarea" placeholder="Paste JSON here to restore..."></textarea>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-fancy" onclick="generateBackup()">
-                        <div class="btn-fancy-icon">💾</div>
-                        <div class="btn-fancy-text">Generate Backup</div>
-                    </button>
-                    <button class="btn-fancy btn-primary" onclick="restoreBackup()">
-                         <div class="btn-fancy-icon">🔄</div>
-                        <div class="btn-fancy-text">Restore from Text</div>
-                    </button>
-                </div>
             </div>
+        </div>
+        <div style="padding:10px 15px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:10px; background: rgba(0,0,0,0.02); align-items: center;">
+            <button class="btn-fancy" onclick="generateBackup()">
+                <div class="btn-fancy-icon">💾</div>
+                <div class="btn-fancy-text">Generate Backup</div>
+            </button>
+            <button class="btn-fancy btn-primary" onclick="restoreBackup()">
+                 <div class="btn-fancy-icon">🔄</div>
+                <div class="btn-fancy-text">Restore from Text</div>
+            </button>
+            <button class="btn-fancy" style="margin-left: auto;" onclick="confirmResetSite()">
+                 <div class="btn-fancy-icon" style="background: transparent;">⚠️</div>
+                <div class="btn-fancy-text">Reset Site</div>
+            </button>
         </div>
     </div>
 </div>
@@ -632,6 +647,26 @@ function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
     }[tag]));
+}
+
+function ipToInt(ip) {
+    const parts = ip.split('.');
+    if (parts.length !== 4) return 0;
+    return parts.reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+}
+
+function sortEntities(a, b) {
+    if (a.sub !== b.sub) return a.sub.localeCompare(b.sub);
+    
+    // Sort IPv4 naturally as IP addresses
+    if (a.sub === 'IPv4') {
+        const ipA = a.val.replace(/[\[\]\(\)]/g, ''); 
+        const ipB = b.val.replace(/[\[\]\(\)]/g, '');
+        return ipToInt(ipA) - ipToInt(ipB);
+    }
+    
+    // Fallback natural sort for Domains, Hashes, and IPv6
+    return a.val.localeCompare(b.val, undefined, { numeric: true, sensitivity: 'base' });
 }
 
 // --- Embedded Sources ---
@@ -762,6 +797,7 @@ const sources = {
 
 const app = {
     data: { ip:[], domain:[], hash:[] },
+    prevCounts: { ip: 0, domain: 0, hash: 0 },
     verdicts: {},
     disabled: {}, 
     sources: {},          
@@ -876,6 +912,7 @@ function analyzeInput() {
     setTimeout(() => { els.backdrop.scrollTop = els.input.scrollTop; }, 0);
 
     if(!text.trim()) {
+        app.prevCounts = { ip: 0, domain: 0, hash: 0 };
         renderStack();
         updateStats();
         return;
@@ -905,15 +942,29 @@ function analyzeInput() {
     });['ip','domain','hash'].forEach(k => {
         const unique = new Map();
         app.data[k].forEach(item => unique.set(item.val, item));
-        app.data[k] = Array.from(unique.values()).sort((a,b) => {
-            if(a.sub !== b.sub) return a.sub.localeCompare(b.sub);
-            return a.val.localeCompare(b.val);
-        });
+        app.data[k] = Array.from(unique.values()).sort(sortEntities);
     });
 
-    if (app.data.ip.length > 0) setFocus('ip');
-    else if (app.data.domain.length > 0) setFocus('domain');
-    else if (app.data.hash.length > 0) setFocus('hash');
+    // Detect which specific entity type was newly added and auto-focus it
+    let newlyAddedType = null;
+    if (app.data.ip.length > app.prevCounts.ip) newlyAddedType = 'ip';
+    else if (app.data.domain.length > app.prevCounts.domain) newlyAddedType = 'domain';
+    else if (app.data.hash.length > app.prevCounts.hash) newlyAddedType = 'hash';
+
+    if (newlyAddedType && newlyAddedType !== app.focusedType) {
+        setFocus(newlyAddedType);
+    } else if (app.focusedType !== 'bookmarks' && (!app.data[app.focusedType] || app.data[app.focusedType].length === 0)) {
+        // Fallback: If currently focused type becomes completely empty, switch to another available type
+        if (app.data.ip.length > 0) setFocus('ip');
+        else if (app.data.domain.length > 0) setFocus('domain');
+        else if (app.data.hash.length > 0) setFocus('hash');
+    }
+    
+    app.prevCounts = {
+        ip: app.data.ip.length,
+        domain: app.data.domain.length,
+        hash: app.data.hash.length
+    };
 
     renderStack();
     updateStats();
@@ -1353,6 +1404,15 @@ function toggleSelectAll() {
 
 function toggleSort() { app.sortDesc = !app.sortDesc; renderContext(); }
 
+function showWarningModal(htmlContent, confirmCallback) {
+    document.getElementById('warning-modal-body').innerHTML = htmlContent;
+    document.getElementById('warning-modal').classList.add('open');
+    document.getElementById('warning-modal-confirm').onclick = () => {
+        document.getElementById('warning-modal').classList.remove('open');
+        confirmCallback();
+    };
+}
+
 function executeInvestigation() {
     const cat = app.focusedType;
     const selIds = app.selected[cat] ||[];
@@ -1399,12 +1459,9 @@ function executeInvestigation() {
     if(urls.length > 20) warnings.push(`You are about to open <b>${urls.length} tabs</b> at once. Your browser may block them or slow down significantly.`);
 
     if(warnings.length > 0) {
-        document.getElementById('warning-modal-body').innerHTML = warnings.map(w => `<p style="margin-bottom:10px;">${w}</p>`).join('');
-        document.getElementById('warning-modal').classList.add('open');
-        document.getElementById('warning-modal-confirm').onclick = () => {
-            document.getElementById('warning-modal').classList.remove('open');
+        showWarningModal(warnings.map(w => `<p style="margin-bottom:10px;">${w}</p>`).join(''), () => {
             urls.forEach(u => window.open(u, '_blank'));
-        };
+        });
         return;
     }
     urls.forEach(u => window.open(u, '_blank'));
@@ -1432,6 +1489,46 @@ function setRepFormat(mode) {
 }
 
 function openReportModal() {
+    const isBookmarks = app.focusedType === 'bookmarks';
+
+    if (isBookmarks) {
+        const selCount = (app.selected.bookmarks || []).length;
+        if (selCount === 0) return showToast('No bookmarks selected.', 'warning');
+        
+        document.getElementById('rep-inc-standard').classList.add('hidden');
+        document.getElementById('rep-inc-bookmarks').classList.remove('hidden');
+        
+        setRepFormat('simple');
+        document.getElementById('fmt-full-btn').disabled = true;
+        
+        // Disable useless options for bookmarks
+        setLabelDisabledState('rep-defang', true);
+        setLabelDisabledState('rep-refs', true);
+        
+        // Ensure simple refs toggle is active since Bookmarks act as references
+        setLabelDisabledState('rep-simple-refs', false);
+        document.getElementById('rep-simple-refs').checked = true;
+        
+        setLabelDisabledState('rep-verdict', true);
+        setLabelDisabledState('rep-space', true);
+        
+        document.getElementById('rep-quote').disabled = true;
+        document.getElementById('rep-list-style').disabled = true;
+        document.getElementById('rep-sep-type').disabled = true;
+        document.getElementById('rep-sep-count').disabled = true;
+        
+        document.getElementById('report-modal').classList.add('open');
+        generateReport();
+        
+        const bmkIds = ['rep-simple-refs'];
+        bmkIds.forEach(id => { const el = document.getElementById(id); if(el) el.onchange = generateReport; });
+        return;
+    }
+
+    // Normal IOC Logic
+    document.getElementById('rep-inc-standard').classList.remove('hidden');
+    document.getElementById('rep-inc-bookmarks').classList.add('hidden');
+
     const ipHas = app.data.ip.length > 0;
     const domHas = app.data.domain.length > 0;
     const hashHas = app.data.hash.length > 0;
@@ -1499,25 +1596,45 @@ function toggleSepCount() {
 }
 
 function generateReport() {
+    const isBookmarks = app.focusedType === 'bookmarks';
+    const quoteMap = { "":"",'\'':"'",'"':'"', '`':'`' };
+    const q = quoteMap[document.getElementById('rep-quote').value] || "";
+    const listStyle = document.getElementById('rep-list-style').value;
+
+    // Handle Bookmarks Special Report
+    if (isBookmarks) {
+        let text = "===== Bookmarks =====\n\n(No Entities Extracted)";
+        const showRefs = document.getElementById('rep-simple-refs').checked;
+        
+        if (showRefs) {
+            const sel = app.selected.bookmarks || [];
+            const bms = app.sources.bookmarks.filter(s => sel.includes(s.id));
+            if (bms.length > 0) {
+                text += "\n\nReferences:\n";
+                text += bms.map(b => `- ${b.url}`).join('\n');
+            }
+        }
+        document.getElementById('report-output').value = text;
+        return;
+    }
+
     const mode = document.getElementById('rep-mode').value;
     const isFull = mode === 'full';
     
     const fullOpts = document.getElementById('rep-opts-full');
     const simpleOpts = document.getElementById('rep-opts-simple');
     const sepStyle = document.getElementById('rep-style-sep');
-    const listStyle = document.getElementById('rep-style-list');
+    const listStyleDiv = document.getElementById('rep-style-list');
 
     if (isFull) {
         fullOpts.classList.remove('hidden'); simpleOpts.classList.add('hidden');
-        sepStyle.classList.remove('hidden'); listStyle.classList.add('hidden');
+        sepStyle.classList.remove('hidden'); listStyleDiv.classList.add('hidden');
     } else {
         fullOpts.classList.add('hidden'); simpleOpts.classList.remove('hidden');
-        sepStyle.classList.add('hidden'); listStyle.classList.remove('hidden');
+        sepStyle.classList.add('hidden'); listStyleDiv.classList.remove('hidden');
     }
 
     const defangRep = document.getElementById('rep-defang').checked;
-    const quoteMap = { "":"",'\'':"'",'"':'"' };
-    const q = quoteMap[document.getElementById('rep-quote').value] || "";
     
     let blocks = [];
     const cats =[];
@@ -1586,7 +1703,6 @@ function generateReport() {
             sectionText += entryBlocks.join(fullSep);
             
         } else {
-            const style = document.getElementById('rep-list-style').value;
             sectionText += `===== ${headerTitle} =====`;
             
             if (items.length > 0) {
@@ -1603,11 +1719,13 @@ function generateReport() {
                         return `${q}${v}${q}`;
                     });
 
-                    if(style === 'comma') subBlock += subItems.join(', ');
+                    if(listStyle === 'comma') subBlock += subItems.join(', ');
+                    else if(listStyle === 'and') subBlock += subItems.join(' and ');
+                    else if(listStyle === 'or') subBlock += subItems.join(' or ');
                     else {
                         let prefix = "";
-                        if(style === 'bullet-') prefix = "- ";
-                        if(style === 'bullet*') prefix = "* ";
+                        if(listStyle === 'bullet-') prefix = "- ";
+                        if(listStyle === 'bullet*') prefix = "* ";
                         subBlock += subItems.map(x => prefix + x).join('\n');
                     }
                     subBlocks.push(subBlock);
@@ -1673,11 +1791,21 @@ function setTheme(t) {
     document.getElementById('theme-card-light').classList.toggle('active', t === 'light');
     saveState();
 }
+
 function generateBackup() {
     const backup = { customSources: app.customSources, favorites: app.favorites, presets: app.presets, settings: app.settings };
-    document.getElementById('backup-area').value = JSON.stringify(backup, null, 2);
-    showToast("Backup Generated", "success");
+    const backupStr = JSON.stringify(backup, null, 2);
+    document.getElementById('backup-area').value = backupStr;
+    
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(backupStr).then(() => {
+            showToast("Backup Generated & Copied!", "success");
+        }).catch(() => showToast("Backup Generated", "success"));
+    } else {
+        showToast("Backup Generated", "success");
+    }
 }
+
 function restoreBackup() {
     try {
         const j = JSON.parse(document.getElementById('backup-area').value);
@@ -1700,6 +1828,16 @@ function restoreBackup() {
     } catch(e) { showToast("Invalid JSON format", "error"); }
 }
 
+function confirmResetSite() {
+    showWarningModal('<p style="margin:0;">Are you sure you want to completely reset the site? This will delete all custom sources, favorites, and settings.</p>', () => {
+        localStorage.removeItem('totalosint_settings');
+        localStorage.removeItem('totalosint_custom_sources');
+        localStorage.removeItem('totalosint_favorites');
+        localStorage.removeItem('totalosint_presets');
+        location.reload();
+    });
+}
+
 function defang(s) { return s.replace(/\./g, '[.]').replace(/:/g, '[:]').replace(/http/gi, 'hxxp').replace(/\[:\]\/\//g, '[://]'); }
 
 function hardReset() { 
@@ -1709,7 +1847,6 @@ function hardReset() {
     app.expanded = new Set();
     analyzeInput(); 
     els.input.focus();
-    showToast("Data and entities cleared", "success");
 }
 
 function debounce(func, wait) {
